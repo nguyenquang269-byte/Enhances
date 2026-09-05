@@ -137,7 +137,9 @@
       width: 3px;
       background: var(--accent);
       cursor: ew-resize;
-      z-index: 20;
+      z-index: 25;
+      pointer-events: auto;
+      touch-action: none;
     }
     .compare-slider-handle {
       position: absolute;
@@ -153,6 +155,9 @@
       align-items: center;
       justify-content: center;
       box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+      pointer-events: auto;
+      touch-action: none;
+      cursor: ew-resize;
     }
     .scrollbar-thin::-webkit-scrollbar {
       width: 5px;
@@ -201,14 +206,14 @@
 
     <!-- Quick Actions in Header -->
     <div class="flex items-center gap-1.5 sm:gap-2">
-      <button id="headerCloudBtn" title="Lịch sử 20 ảnh đã lưu trên Cloud" class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-[var(--card)] text-[var(--accent2)] border border-[var(--border)] hover:border-[var(--accent2)] transition-all">
+      <button type="button" id="headerCloudBtn" title="Lịch sử 20 ảnh đã lưu trên Cloud" class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-[var(--card)] text-[var(--accent2)] border border-[var(--border)] hover:border-[var(--accent2)] active:scale-95 transition-all cursor-pointer">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/>
         </svg>
         <span class="hidden xs:inline">Đã lưu (<span id="cloudCountBadge">0</span>)</span>
       </button>
 
-      <button id="headerUploadBtn" class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-[var(--card)] text-[var(--text)] border border-[var(--border)] hover:border-[var(--accent)] transition-all">
+      <button type="button" id="headerUploadBtn" class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-[var(--card)] text-[var(--text)] border border-[var(--border)] hover:border-[var(--accent)] active:scale-95 transition-all cursor-pointer select-none">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M12 5v14M5 12h14"/>
         </svg>
@@ -216,7 +221,7 @@
       </button>
 
       <div id="headerActionsLoaded" style="display: none;" class="flex items-center gap-1.5">
-        <button id="headerDownloadBtn" class="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[var(--accent)] text-[#1a1a1e] hover:brightness-110 shadow-sm transition-all">
+        <button type="button" id="headerDownloadBtn" class="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[var(--accent)] text-[#1a1a1e] hover:brightness-110 active:scale-95 shadow-sm transition-all cursor-pointer">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
             <polyline points="7 10 12 15 17 10"/>
@@ -225,7 +230,7 @@
           <span>Tải ảnh</span>
         </button>
       </div>
-      <input type="file" id="fileInput" multiple accept="image/*" class="hidden">
+      <input type="file" id="fileInput" multiple accept="image/*" class="sr-only" style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;" tabindex="-1" aria-hidden="true">
     </div>
   </header>
 
@@ -233,20 +238,20 @@
   <main id="emptyState" class="flex-1 overflow-y-auto px-4 py-6 flex flex-col items-center justify-center text-center">
     <div class="w-full max-w-md mx-auto flex flex-col items-center">
       <div id="dropZone" class="w-full rounded-2xl p-6 sm:p-8 text-center border-2 border-dashed border-[var(--border)] bg-[var(--card)] hover:border-[var(--accent)] transition-all cursor-pointer">
-        <div class="w-14 h-14 rounded-2xl bg-[var(--accent-soft)] flex items-center justify-center text-[var(--accent)] mx-auto mb-4">
+        <div class="w-14 h-14 rounded-2xl bg-[var(--accent-soft)] flex items-center justify-center text-[var(--accent)] mx-auto mb-4 pointer-events-none">
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
             <polyline points="17 8 12 3 7 8"/>
             <line x1="12" y1="15" x2="12" y2="3"/>
           </svg>
         </div>
-        <h2 class="text-base sm:text-lg font-bold text-[var(--text)] mb-1">Chọn hoặc Kéo thả ảnh vào đây</h2>
-        <p class="text-xs text-[var(--muted)] mb-4">Hỗ trợ JPG, PNG, WebP • Tự động tối ưu ngay khi chọn</p>
+        <h2 class="text-base sm:text-lg font-bold text-[var(--text)] mb-1 pointer-events-none">Chọn hoặc Kéo thả ảnh vào đây</h2>
+        <p class="text-xs text-[var(--muted)] mb-4 pointer-events-none">Hỗ trợ JPG, PNG, WebP • Tự động tối ưu ngay khi chọn</p>
         <div class="flex flex-col sm:flex-row gap-2 justify-center">
-          <button id="browseBtn" class="px-5 py-2.5 rounded-xl font-semibold bg-[var(--accent)] text-[#1a1a1e] text-xs sm:text-sm hover:brightness-110 transition-all">
+          <button type="button" id="browseBtn" class="px-5 py-2.5 rounded-xl font-semibold bg-[var(--accent)] text-[#1a1a1e] text-xs sm:text-sm hover:brightness-110 active:scale-95 transition-all cursor-pointer select-none shadow-md inline-flex items-center justify-center">
             Chọn Tệp Ảnh
           </button>
-          <button id="demoBtn" class="px-4 py-2.5 rounded-xl font-medium bg-[var(--bg)] text-[var(--text)] border border-[var(--border)] text-xs sm:text-sm hover:border-[var(--accent)] transition-all">
+          <button type="button" id="demoBtn" class="px-4 py-2.5 rounded-xl font-medium bg-[var(--bg)] text-[var(--text)] border border-[var(--border)] text-xs sm:text-sm hover:border-[var(--accent)] active:scale-95 transition-all cursor-pointer select-none">
             ✨ Thử Với Ảnh Mẫu
           </button>
         </div>
@@ -321,7 +326,7 @@
 
         <div class="flex items-center gap-1.5 pointer-events-auto">
           <!-- Split compare toggle -->
-          <button id="splitCompareBtn" title="Bật/Tắt thanh trượt so sánh" class="px-2 py-1 rounded-lg text-xs font-medium bg-[rgba(32,32,36,0.85)] text-[var(--text)] border border-[var(--border)] backdrop-blur-md hover:border-[var(--accent)] flex items-center gap-1">
+          <button type="button" id="splitCompareBtn" title="Bật/Tắt thanh trượt so sánh" class="px-2 py-1 rounded-lg text-xs font-medium bg-[rgba(32,32,36,0.85)] text-[var(--text)] border border-[var(--border)] backdrop-blur-md hover:border-[var(--accent)] active:scale-95 transition-all cursor-pointer flex items-center gap-1">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <rect x="3" y="3" width="18" height="18" rx="2"/>
               <line x1="12" y1="3" x2="12" y2="21"/>
@@ -340,8 +345,8 @@
         <div id="splitOverlay" style="display: none;" class="absolute inset-0 flex items-center justify-center p-2 pointer-events-none overflow-hidden">
           <div id="splitClipper" class="relative max-h-full max-w-full overflow-hidden flex items-center justify-center" style="width: 100%; height: 100%;">
             <img id="originalImgEl" class="max-h-full max-w-full object-contain pointer-events-none select-none block" style="clip-path: inset(0 50% 0 0);">
-            <div id="splitSliderBar" class="compare-slider" style="left: 50%;">
-              <div class="compare-slider-handle">
+            <div id="splitSliderBar" class="compare-slider pointer-events-auto" style="left: 50%;">
+              <div class="compare-slider-handle pointer-events-auto">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1a1a1e" stroke-width="2.5">
                   <polyline points="8 17 3 12 8 7"/>
                   <polyline points="16 7 21 12 16 17"/>
@@ -352,7 +357,7 @@
         </div>
 
         <!-- Touch & Hold to View Original Button (Super convenient on mobile) -->
-        <button id="holdCompareBtn" class="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-[rgba(26,26,30,0.88)] text-[var(--text)] border border-[rgba(240,237,232,0.2)] backdrop-blur-md shadow-lg flex items-center gap-1.5 active:scale-95 active:bg-[var(--accent)] active:text-[#1a1a1e] transition-all cursor-pointer">
+        <button type="button" id="holdCompareBtn" class="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-[rgba(26,26,30,0.88)] text-[var(--text)] border border-[rgba(240,237,232,0.2)] backdrop-blur-md shadow-lg flex items-center gap-1.5 active:scale-95 active:bg-[var(--accent)] active:text-[#1a1a1e] transition-all cursor-pointer select-none">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
             <circle cx="12" cy="12" r="3"/>
@@ -366,12 +371,12 @@
         <div id="filmstrip" class="flex items-center gap-2">
           <!-- Thumbnails rendered dynamically -->
         </div>
-        <button id="addMoreBtn" class="h-8 px-2 rounded-lg bg-[var(--card)] hover:bg-[var(--card-hover)] border border-[var(--border)] text-xs text-[var(--muted)] flex items-center gap-1 shrink-0">
+        <label for="fileInput" id="addMoreBtn" role="button" tabindex="0" class="h-8 px-2.5 rounded-lg bg-[var(--card)] hover:bg-[var(--card-hover)] border border-[var(--border)] text-xs text-[var(--muted)] hover:text-[var(--text)] flex items-center gap-1 shrink-0 cursor-pointer active:scale-95 transition-all select-none">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M12 5v14M5 12h14"/>
           </svg>
           <span>Thêm</span>
-        </button>
+        </label>
       </div>
     </section>
 
@@ -380,16 +385,16 @@
       
       <!-- Studio Tabs Row -->
       <div class="flex-none h-11 px-2 sm:px-3 border-b border-[var(--border)] bg-[#202025] flex items-center justify-around gap-1">
-        <button class="tab-btn active flex-1 h-full text-xs font-medium text-[var(--muted)] flex items-center justify-center gap-1" data-tab="enhance">
+        <button type="button" class="tab-btn active flex-1 h-full text-xs font-medium text-[var(--muted)] flex items-center justify-center gap-1 active:scale-95 transition-all cursor-pointer" data-tab="enhance">
           <span>✨ Nâng cấp</span>
         </button>
-        <button class="tab-btn flex-1 h-full text-xs font-medium text-[var(--muted)] flex items-center justify-center gap-1" data-tab="presets">
+        <button type="button" class="tab-btn flex-1 h-full text-xs font-medium text-[var(--muted)] flex items-center justify-center gap-1 active:scale-95 transition-all cursor-pointer" data-tab="presets">
           <span>🎨 Bộ lọc</span>
         </button>
-        <button class="tab-btn flex-1 h-full text-xs font-medium text-[var(--muted)] flex items-center justify-center gap-1" data-tab="adjust">
+        <button type="button" class="tab-btn flex-1 h-full text-xs font-medium text-[var(--muted)] flex items-center justify-center gap-1 active:scale-95 transition-all cursor-pointer" data-tab="adjust">
           <span>⚙️ Chỉnh</span>
         </button>
-        <button class="tab-btn flex-1 h-full text-xs font-medium text-[var(--muted)] flex items-center justify-center gap-1 text-[var(--accent2)]" data-tab="history">
+        <button type="button" class="tab-btn flex-1 h-full text-xs font-medium text-[var(--muted)] flex items-center justify-center gap-1 text-[var(--accent2)] active:scale-95 transition-all cursor-pointer" data-tab="history">
           <span>☁️ Lưu trữ</span>
         </button>
       </div>
@@ -406,8 +411,8 @@
               <span class="text-xs font-medium text-[var(--text)]">Cường độ hiệu ứng</span>
               <span id="enhanceIntensityVal" class="text-xs font-mono text-[var(--accent)] font-semibold">100%</span>
             </div>
-            <input type="range" id="enhanceIntensity" class="slider-track w-full" min="0" max="100" value="100">
-            <div class="flex justify-between text-[10px] text-[var(--muted)] mt-1">
+            <input type="range" id="enhanceIntensity" class="slider-track w-full cursor-pointer" min="0" max="100" value="100">
+            <div class="flex justify-between text-[10px] text-[var(--muted)] mt-1 select-none">
               <span>0% (Ảnh gốc)</span>
               <span>50%</span>
               <span>100% (Chuẩn)</span>
@@ -415,11 +420,11 @@
           </div>
 
           <!-- Enhancement feature cards -->
-          <div class="grid grid-cols-2 gap-2">
+          <div class="grid grid-cols-2 gap-2" id="enhanceCardsGrid">
             
             <!-- 1. Auto Enhance (Default active) -->
-            <div class="enhance-card active p-3" data-enhance="auto">
-              <div class="flex items-center justify-between mb-1.5">
+            <div class="enhance-card active p-3 cursor-pointer select-none active:scale-[0.98]" role="button" tabindex="0" data-enhance="auto">
+              <div class="flex items-center justify-between mb-1.5 pointer-events-none">
                 <div class="w-7 h-7 rounded-lg bg-[var(--accent-soft)] flex items-center justify-center text-[var(--accent)] font-bold text-sm">
                   ✨
                 </div>
@@ -427,13 +432,13 @@
                   Đang bật
                 </span>
               </div>
-              <div class="text-xs font-bold text-[var(--text)]">Tự Động Tối Ưu</div>
-              <div class="text-[10px] text-[var(--muted)] leading-tight mt-0.5">AI cân bằng màu, sáng & tương phản</div>
+              <div class="text-xs font-bold text-[var(--text)] pointer-events-none">Tự Động Tối Ưu</div>
+              <div class="text-[10px] text-[var(--muted)] leading-tight mt-0.5 pointer-events-none">AI cân bằng màu, sáng & tương phản</div>
             </div>
 
             <!-- 2. HD Enhance -->
-            <div class="enhance-card p-3" data-enhance="hd">
-              <div class="flex items-center justify-between mb-1.5">
+            <div class="enhance-card p-3 cursor-pointer select-none active:scale-[0.98]" role="button" tabindex="0" data-enhance="hd">
+              <div class="flex items-center justify-between mb-1.5 pointer-events-none">
                 <div class="w-7 h-7 rounded-lg bg-[var(--accent-soft)] flex items-center justify-center text-[var(--accent)] font-bold text-sm">
                   💎
                 </div>
@@ -441,13 +446,13 @@
                   Đang bật
                 </span>
               </div>
-              <div class="text-xs font-bold text-[var(--text)]">Nâng Cấp HD</div>
-              <div class="text-[10px] text-[var(--muted)] leading-tight mt-0.5">Tăng độ nét vi mô & chiều sâu chi tiết</div>
+              <div class="text-xs font-bold text-[var(--text)] pointer-events-none">Nâng Cấp HD</div>
+              <div class="text-[10px] text-[var(--muted)] leading-tight mt-0.5 pointer-events-none">Tăng độ nét vi mô & chiều sâu chi tiết</div>
             </div>
 
             <!-- 3. Denoise -->
-            <div class="enhance-card p-3" data-enhance="denoise">
-              <div class="flex items-center justify-between mb-1.5">
+            <div class="enhance-card p-3 cursor-pointer select-none active:scale-[0.98]" role="button" tabindex="0" data-enhance="denoise">
+              <div class="flex items-center justify-between mb-1.5 pointer-events-none">
                 <div class="w-7 h-7 rounded-lg bg-[var(--accent2-soft)] flex items-center justify-center text-[var(--accent2)] font-bold text-sm">
                   🛡️
                 </div>
@@ -455,13 +460,13 @@
                   Đang bật
                 </span>
               </div>
-              <div class="text-xs font-bold text-[var(--text)]">Giảm Nhiễu</div>
-              <div class="text-[10px] text-[var(--muted)] leading-tight mt-0.5">Khử hạt noise, làm mịn màng tự nhiên</div>
+              <div class="text-xs font-bold text-[var(--text)] pointer-events-none">Giảm Nhiễu</div>
+              <div class="text-[10px] text-[var(--muted)] leading-tight mt-0.5 pointer-events-none">Khử hạt noise, làm mịn màng tự nhiên</div>
             </div>
 
             <!-- 4. Sharpen -->
-            <div class="enhance-card p-3" data-enhance="sharpen">
-              <div class="flex items-center justify-between mb-1.5">
+            <div class="enhance-card p-3 cursor-pointer select-none active:scale-[0.98]" role="button" tabindex="0" data-enhance="sharpen">
+              <div class="flex items-center justify-between mb-1.5 pointer-events-none">
                 <div class="w-7 h-7 rounded-lg bg-[var(--accent-soft)] flex items-center justify-center text-[var(--accent)] font-bold text-sm">
                   ⚡
                 </div>
@@ -469,13 +474,13 @@
                   Đang bật
                 </span>
               </div>
-              <div class="text-xs font-bold text-[var(--text)]">Tăng Sắc Nét</div>
-              <div class="text-[10px] text-[var(--muted)] leading-tight mt-0.5">Unsharp Mask làm sắc cạnh mọi chi tiết</div>
+              <div class="text-xs font-bold text-[var(--text)] pointer-events-none">Tăng Sắc Nét</div>
+              <div class="text-[10px] text-[var(--muted)] leading-tight mt-0.5 pointer-events-none">Unsharp Mask làm sắc cạnh mọi chi tiết</div>
             </div>
 
             <!-- 5. HDR Effect -->
-            <div class="enhance-card p-3" data-enhance="hdr">
-              <div class="flex items-center justify-between mb-1.5">
+            <div class="enhance-card p-3 cursor-pointer select-none active:scale-[0.98]" role="button" tabindex="0" data-enhance="hdr">
+              <div class="flex items-center justify-between mb-1.5 pointer-events-none">
                 <div class="w-7 h-7 rounded-lg bg-[var(--accent2-soft)] flex items-center justify-center text-[var(--accent2)] font-bold text-sm">
                   🌅
                 </div>
@@ -483,13 +488,13 @@
                   Đang bật
                 </span>
               </div>
-              <div class="text-xs font-bold text-[var(--text)]">Hiệu Ứng HDR</div>
-              <div class="text-[10px] text-[var(--muted)] leading-tight mt-0.5">Cứu vùng tối, làm dịu vùng chói gắt</div>
+              <div class="text-xs font-bold text-[var(--text)] pointer-events-none">Hiệu Ứng HDR</div>
+              <div class="text-[10px] text-[var(--muted)] leading-tight mt-0.5 pointer-events-none">Cứu vùng tối, làm dịu vùng chói gắt</div>
             </div>
 
             <!-- 6. Original -->
-            <div class="enhance-card p-3" data-enhance="original">
-              <div class="flex items-center justify-between mb-1.5">
+            <div class="enhance-card p-3 cursor-pointer select-none active:scale-[0.98]" role="button" tabindex="0" data-enhance="original">
+              <div class="flex items-center justify-between mb-1.5 pointer-events-none">
                 <div class="w-7 h-7 rounded-lg bg-[#2f2f36] flex items-center justify-center text-[var(--muted)] font-bold text-sm">
                   🔄
                 </div>
@@ -497,16 +502,16 @@
                   Đang bật
                 </span>
               </div>
-              <div class="text-xs font-bold text-[var(--text)]">Ảnh Gốc</div>
-              <div class="text-[10px] text-[var(--muted)] leading-tight mt-0.5">Tắt mọi hiệu ứng nâng cấp</div>
+              <div class="text-xs font-bold text-[var(--text)] pointer-events-none">Ảnh Gốc</div>
+              <div class="text-[10px] text-[var(--muted)] leading-tight mt-0.5 pointer-events-none">Tắt mọi hiệu ứng nâng cấp</div>
             </div>
 
           </div>
 
           <!-- Batch toggle -->
           <div class="p-2.5 rounded-xl bg-[var(--bg)] border border-[var(--border)] flex items-center justify-between">
-            <label class="flex items-center gap-2 cursor-pointer text-xs text-[var(--text)]">
-              <input type="checkbox" id="applyAllCheckbox" checked class="w-4 h-4 accent-[var(--accent)] rounded">
+            <label class="flex items-center gap-2 cursor-pointer text-xs text-[var(--text)] select-none">
+              <input type="checkbox" id="applyAllCheckbox" checked class="w-4 h-4 accent-[var(--accent)] rounded cursor-pointer">
               <span>Đồng bộ hiệu ứng cho tất cả ảnh</span>
             </label>
             <span class="text-[10px] text-[var(--muted)]">Hàng loạt</span>
@@ -524,7 +529,7 @@
         <div id="adjustTab" class="tab-content hidden flex flex-col gap-3">
           <div class="flex items-center justify-between mb-1">
             <span class="text-xs text-[var(--muted)] uppercase tracking-wider font-semibold">Thông số thủ công</span>
-            <button id="resetAdjustBtn" class="text-xs text-[var(--accent)] hover:underline font-medium">Đặt lại chỉnh sửa</button>
+            <button type="button" id="resetAdjustBtn" class="text-xs text-[var(--accent)] hover:underline active:scale-95 font-medium cursor-pointer">Đặt lại chỉnh sửa</button>
           </div>
           <div id="adjustSliders" class="flex flex-col gap-3">
             <!-- Sliders rendered by JS -->
@@ -538,7 +543,7 @@
               <span class="text-sm">☁️</span>
               <span class="text-xs font-semibold text-[var(--text)]">Cloud Firestore (20 gần nhất)</span>
             </div>
-            <button id="refreshCloudBtn" class="text-[11px] text-[var(--accent2)] hover:underline flex items-center gap-1">
+            <button type="button" id="refreshCloudBtn" class="text-[11px] text-[var(--accent2)] hover:underline active:scale-95 flex items-center gap-1 cursor-pointer">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M23 4v6h-6M1 20v-6h6"/>
                 <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
@@ -558,15 +563,15 @@
 
       <!-- Bottom Action Footer (Safe Area on Mobile) -->
       <footer class="flex-none p-3 border-t border-[var(--border)] bg-[#1e1e22] flex items-center justify-between gap-2">
-        <button id="footerResetBtn" class="px-3 py-2 rounded-xl text-xs font-medium bg-[var(--card)] text-[var(--muted)] hover:text-[var(--text)] border border-[var(--border)] transition-all">
+        <button type="button" id="footerResetBtn" class="px-3 py-2 rounded-xl text-xs font-medium bg-[var(--card)] text-[var(--muted)] hover:text-[var(--text)] border border-[var(--border)] active:scale-95 transition-all cursor-pointer">
           Đặt lại
         </button>
 
         <div class="flex items-center gap-2 flex-1 justify-end">
-          <button id="footerDownloadAllBtn" style="display: none;" class="px-3 py-2 rounded-xl text-xs font-semibold bg-[var(--card)] text-[var(--text)] border border-[var(--border)] hover:border-[var(--accent)] transition-all">
+          <button type="button" id="footerDownloadAllBtn" style="display: none;" class="px-3 py-2 rounded-xl text-xs font-semibold bg-[var(--card)] text-[var(--text)] border border-[var(--border)] hover:border-[var(--accent)] active:scale-95 transition-all cursor-pointer">
             Tải tất cả (<span id="allCount">0</span>)
           </button>
-          <button id="footerDownloadBtn" class="flex-1 sm:flex-none px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-[var(--accent)] text-[#1a1a1e] hover:brightness-110 shadow-md flex items-center justify-center gap-1.5 transition-all">
+          <button type="button" id="footerDownloadBtn" class="flex-1 sm:flex-none px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-[var(--accent)] text-[#1a1a1e] hover:brightness-110 active:scale-95 shadow-md flex items-center justify-center gap-1.5 transition-all cursor-pointer">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
               <polyline points="7 10 12 15 17 10"/>
@@ -686,19 +691,24 @@
 
   function initFirebase() {
     try {
-      if (window.firebase && !window.firebase.apps.length) {
-        window.firebase.initializeApp(firebaseConfig);
-        firestoreDb = window.firebase.firestore();
-        // If specific named database ID is configured
-        if (firebaseConfig.firestoreDatabaseId && typeof firestoreDb.databaseId !== 'undefined') {
-          // default instance is standard
+      if (typeof window !== 'undefined' && window.firebase) {
+        if (!window.firebase.apps || !window.firebase.apps.length) {
+          window.firebase.initializeApp(firebaseConfig);
         }
-      } else if (window.firebase) {
-        firestoreDb = window.firebase.firestore();
+        var targetDbId = firebaseConfig.firestoreDatabaseId;
+        if (targetDbId && typeof window.firebase.app === 'function') {
+          try {
+            firestoreDb = window.firebase.app().firestore(targetDbId);
+          } catch (eNamed) {
+            firestoreDb = window.firebase.firestore();
+          }
+        } else {
+          firestoreDb = window.firebase.firestore();
+        }
+        loadRecentCloudImages();
       }
-      loadRecentCloudImages();
     } catch (err) {
-      console.warn('Firebase init error:', err);
+      console.warn('Firebase init error (continuing offline):', err);
     }
   }
 
@@ -724,6 +734,10 @@
       var docId = String(imgObj.cloudDocId || ('img_' + Date.now() + '_' + Math.floor(Math.random() * 1000)));
       imgObj.cloudDocId = docId;
 
+      var serverTime = (window.firebase && window.firebase.firestore && window.firebase.firestore.FieldValue)
+        ? window.firebase.firestore.FieldValue.serverTimestamp()
+        : new Date();
+
       var dataToSave = {
         name: imgObj.name || 'anh_nang_cap.jpg',
         fileSize: imgObj.fileSize || 0,
@@ -733,8 +747,8 @@
         enhancementMode: imgObj.activeMode || 'auto',
         presetId: imgObj.activePreset || 'Gốc',
         intensity: enhancementIntensity || 0.85,
-        updatedAt: window.firebase.firestore.FieldValue.serverTimestamp(),
-        createdAt: imgObj.createdAt || window.firebase.firestore.FieldValue.serverTimestamp()
+        updatedAt: serverTime,
+        createdAt: imgObj.createdAt || serverTime
       };
 
       var colRef = firestoreDb.collection('images');
@@ -850,7 +864,7 @@
                 '<span class="text-[10px] text-[var(--muted)] font-mono">' + (item.width || 0) + '×' + (item.height || 0) + '</span>' +
               '</div>' +
             '</div>' +
-            '<button class="px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--card)] text-[var(--text)] border border-[var(--border)] group-hover:border-[var(--accent2)] shrink-0">' +
+            '<button type="button" class="px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--card)] text-[var(--text)] border border-[var(--border)] group-hover:border-[var(--accent2)] shrink-0 pointer-events-none">' +
               'Mở lại' +
             '</button>' +
           '</div>';
@@ -917,12 +931,12 @@
   // Render presets
   function renderPresets() {
     presetGrid.innerHTML = presets.map(function(p, i) {
-      return '<div class="preset-card' + (i === 0 ? ' active' : '') + ' p-2.5 text-center cursor-pointer" data-preset="' + p.name + '">' +
-        '<div class="w-full h-8 rounded-md mb-1.5 flex items-center justify-center text-sm bg-[#1e1e22] text-[var(--accent)] font-semibold">' +
+      return '<button type="button" class="preset-card' + (i === 0 ? ' active' : '') + ' p-2.5 text-center cursor-pointer active:scale-95 transition-all select-none" data-preset="' + p.name + '">' +
+        '<div class="w-full h-8 rounded-md mb-1.5 flex items-center justify-center text-sm bg-[#1e1e22] text-[var(--accent)] font-semibold pointer-events-none">' +
           (p.id === 'bw' || p.id === 'noir' ? 'BW' : p.id === 'warm' ? '☀️' : p.id === 'cool' || p.id === 'ocean' ? '❄️' : '🎨') +
         '</div>' +
-        '<div class="text-[11px] font-medium text-[var(--text)] truncate">' + p.name + '</div>' +
-      '</div>';
+        '<div class="text-[11px] font-medium text-[var(--text)] truncate pointer-events-none">' + p.name + '</div>' +
+      '</button>';
     }).join('');
   }
 
@@ -949,45 +963,79 @@
           '<label class="text-[var(--text)] font-medium">' + s.label + '</label>' +
           '<span class="font-mono text-[var(--accent)]" data-val-for="' + s.key + '">' + val + s.unit + '</span>' +
         '</div>' +
-        '<input type="range" class="slider-track w-full" data-slider-key="' + s.key + '" min="' + s.min + '" max="' + s.max + '" value="' + val + '">' +
+        '<input type="range" class="slider-track w-full cursor-pointer" data-slider-key="' + s.key + '" min="' + s.min + '" max="' + s.max + '" value="' + val + '">' +
       '</div>';
     }).join('');
   }
 
   // Event Listeners Setup
   function setupEventListeners() {
-    var triggerFile = function() { fileInput.click(); };
-    browseBtn.addEventListener('click', triggerFile);
-    headerUploadBtn.addEventListener('click', triggerFile);
-    addMoreBtn.addEventListener('click', triggerFile);
-    fileInput.addEventListener('change', handleFileInput);
-
-    // Dropzone
-    dropZone.addEventListener('click', triggerFile);
-    dropZone.addEventListener('dragover', function(e) {
-      e.preventDefault();
-      dropZone.classList.add('border-[var(--accent)]');
-    });
-    dropZone.addEventListener('dragleave', function() {
-      dropZone.classList.remove('border-[var(--accent)]');
-    });
-    dropZone.addEventListener('drop', function(e) {
-      e.preventDefault();
-      dropZone.classList.remove('border-[var(--accent)]');
-      if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-        processIncomingFiles(Array.from(e.dataTransfer.files));
+    var triggerFile = function(e) {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
       }
-    });
+      if (fileInput) {
+        fileInput.click();
+      }
+    };
+
+    if (browseBtn) {
+      browseBtn.addEventListener('click', triggerFile);
+    }
+    if (headerUploadBtn) {
+      headerUploadBtn.addEventListener('click', triggerFile);
+    }
+    if (addMoreBtn) {
+      addMoreBtn.addEventListener('click', triggerFile);
+    }
+    if (fileInput) {
+      fileInput.addEventListener('change', handleFileInput);
+    }
+
+    // Dropzone: only trigger if clicked outside inner buttons
+    if (dropZone) {
+      dropZone.addEventListener('click', function(e) {
+        if (e.target.closest('#browseBtn') || e.target.closest('#demoBtn')) {
+          return;
+        }
+        triggerFile(e);
+      });
+      dropZone.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        dropZone.classList.add('border-[var(--accent)]');
+      });
+      dropZone.addEventListener('dragleave', function() {
+        dropZone.classList.remove('border-[var(--accent)]');
+      });
+      dropZone.addEventListener('drop', function(e) {
+        e.preventDefault();
+        dropZone.classList.remove('border-[var(--accent)]');
+        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+          processIncomingFiles(Array.from(e.dataTransfer.files));
+        }
+      });
+    }
 
     // Sample Demo Image
-    demoBtn.addEventListener('click', function(e) {
-      e.stopPropagation();
-      loadDemoImage();
-    });
+    if (demoBtn) {
+      demoBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        demoBtn.disabled = true;
+        demoBtn.style.opacity = '0.7';
+        loadDemoImage();
+        setTimeout(function() {
+          demoBtn.disabled = false;
+          demoBtn.style.opacity = '1';
+        }, 500);
+      });
+    }
 
     // Cloud History Actions
     if (headerCloudBtn) {
-      headerCloudBtn.addEventListener('click', function() {
+      headerCloudBtn.addEventListener('click', function(e) {
+        e.preventDefault();
         if (studioWorkspace.style.display !== 'none') {
           // Switch to history tab
           document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
@@ -1010,7 +1058,8 @@
     }
 
     if (refreshCloudBtn) {
-      refreshCloudBtn.addEventListener('click', function() {
+      refreshCloudBtn.addEventListener('click', function(e) {
+        e.preventDefault();
         loadRecentCloudImages(true);
         showToast('Đang làm mới danh sách ảnh từ Firebase...');
       });
@@ -1018,13 +1067,16 @@
 
     // Tab Switching
     document.querySelectorAll('.tab-btn').forEach(function(btn) {
-      btn.addEventListener('click', function() {
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        var tabKey = btn.dataset.tab;
+        if (!tabKey) return;
         document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
         btn.classList.add('active');
         document.querySelectorAll('.tab-content').forEach(function(tc) { tc.classList.add('hidden'); });
-        var targetTab = document.getElementById(btn.dataset.tab + 'Tab');
+        var targetTab = document.getElementById(tabKey + 'Tab');
         if (targetTab) targetTab.classList.remove('hidden');
-        if (btn.dataset.tab === 'history') {
+        if (tabKey === 'history') {
           loadRecentCloudImages(true);
         }
       });
@@ -1032,9 +1084,18 @@
 
     // Enhance Mode Cards Click
     document.querySelectorAll('.enhance-card').forEach(function(card) {
-      card.addEventListener('click', function() {
+      var activateCard = function(e) {
+        if (e) e.preventDefault();
         var mode = card.dataset.enhance;
-        setEnhancementMode(mode);
+        if (mode) {
+          setEnhancementMode(mode);
+        }
+      };
+      card.addEventListener('click', activateCard);
+      card.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          activateCard(e);
+        }
       });
     });
 
@@ -1094,16 +1155,15 @@
 
     // Hold To View Original (Mouse + Touch Support for Mobile)
     function startOriginalCompare(e) {
-      if (e) e.preventDefault();
       if (images.length === 0) return;
+      if (e && e.cancelable) e.preventDefault();
       isComparing = true;
       holdCompareText.textContent = 'Đang xem ảnh gốc';
       holdCompareBtn.classList.add('bg-[var(--accent)]', 'text-[#1a1a1e]');
       drawDirectToCanvas(images[currentImageIndex].originalCanvas);
     }
 
-    function endOriginalCompare(e) {
-      if (e) e.preventDefault();
+    function endOriginalCompare() {
       if (!isComparing) return;
       isComparing = false;
       holdCompareText.textContent = 'Giữ xem ảnh gốc';
@@ -1111,32 +1171,44 @@
       renderActiveImage();
     }
 
-    holdCompareBtn.addEventListener('mousedown', startOriginalCompare);
-    window.addEventListener('mouseup', endOriginalCompare);
-    holdCompareBtn.addEventListener('touchstart', startOriginalCompare, { passive: false });
-    window.addEventListener('touchend', endOriginalCompare);
-    window.addEventListener('touchcancel', endOriginalCompare);
+    if (holdCompareBtn) {
+      holdCompareBtn.addEventListener('mousedown', startOriginalCompare);
+      holdCompareBtn.addEventListener('mouseup', endOriginalCompare);
+      holdCompareBtn.addEventListener('mouseleave', endOriginalCompare);
+      holdCompareBtn.addEventListener('touchstart', startOriginalCompare, { passive: false });
+      holdCompareBtn.addEventListener('touchend', endOriginalCompare);
+      holdCompareBtn.addEventListener('touchcancel', endOriginalCompare);
+    }
+    window.addEventListener('mouseup', function() {
+      if (isComparing) endOriginalCompare();
+    });
+    window.addEventListener('touchend', function() {
+      if (isComparing) endOriginalCompare();
+    });
 
     // Split Compare Mode Toggle
-    splitCompareBtn.addEventListener('click', function() {
-      isSplitComparing = !isSplitComparing;
-      splitOverlay.style.display = isSplitComparing ? 'flex' : 'none';
-      splitCompareBtn.classList.toggle('bg-[var(--accent)]', isSplitComparing);
-      splitCompareBtn.classList.toggle('text-[#1a1a1e]', isSplitComparing);
-      if (isSplitComparing) {
-        updateSplitComparePosition(50);
-      }
-    });
+    if (splitCompareBtn) {
+      splitCompareBtn.addEventListener('click', function() {
+        isSplitComparing = !isSplitComparing;
+        splitOverlay.style.display = isSplitComparing ? 'flex' : 'none';
+        splitCompareBtn.classList.toggle('bg-[var(--accent)]', isSplitComparing);
+        splitCompareBtn.classList.toggle('text-[#1a1a1e]', isSplitComparing);
+        if (isSplitComparing) {
+          updateSplitComparePosition(50);
+        }
+      });
+    }
 
     // Split Slider Dragging (Mouse & Touch)
     var isDraggingSlider = false;
     function onSliderStart(e) {
       isDraggingSlider = true;
-      e.preventDefault();
+      if (e && e.cancelable) e.preventDefault();
     }
     function onSliderMove(e) {
       if (!isDraggingSlider) return;
-      var clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      if (e && e.cancelable) e.preventDefault();
+      var clientX = (e.touches && e.touches.length > 0) ? e.touches[0].clientX : e.clientX;
       var rect = splitOverlay.getBoundingClientRect();
       var pct = ((clientX - rect.left) / rect.width) * 100;
       pct = Math.max(0, Math.min(100, pct));
@@ -1146,8 +1218,10 @@
       isDraggingSlider = false;
     }
 
-    splitSliderBar.addEventListener('mousedown', onSliderStart);
-    splitSliderBar.addEventListener('touchstart', onSliderStart, { passive: false });
+    if (splitSliderBar) {
+      splitSliderBar.addEventListener('mousedown', onSliderStart);
+      splitSliderBar.addEventListener('touchstart', onSliderStart, { passive: false });
+    }
     window.addEventListener('mousemove', onSliderMove);
     window.addEventListener('touchmove', onSliderMove, { passive: false });
     window.addEventListener('mouseup', onSliderEnd);
@@ -1508,9 +1582,16 @@
     };
   }
 
-  // Trigger processing and display for current image
+  // Trigger processing and display for current image with smooth rAF debouncing
+  var renderRafId = null;
   function applyCurrentEnhancementToActiveImage() {
-    renderActiveImage();
+    if (renderRafId) {
+      cancelAnimationFrame(renderRafId);
+    }
+    renderRafId = requestAnimationFrame(function() {
+      renderActiveImage();
+      renderRafId = null;
+    });
   }
 
   // Render processed image onto Main Canvas
@@ -1522,8 +1603,8 @@
     dimBadge.textContent = cur.width + '×' + cur.height;
     originalImgEl.src = cur.src;
 
-    // Size canvas properly for preview display (smooth 60fps)
-    var maxDim = 1400;
+    // Size canvas properly for preview display (smooth 60fps, crisp preview)
+    var maxDim = 960;
     var scale = Math.min(1, maxDim / Math.max(cur.width, cur.height));
     var w = Math.round(cur.width * scale);
     var h = Math.round(cur.height * scale);

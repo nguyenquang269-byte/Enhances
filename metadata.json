@@ -1,0 +1,8 @@
+{
+  "name": "Nâng Cấp Ảnh Chuyên Nghiệp",
+  "description": "Xử lý hàng loạt nhiều ảnh cùng lúc với 20+ bộ lọc cao cấp, điều chỉnh chi tiết và thuật toán nâng cấp chất lượng tiên tiến.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

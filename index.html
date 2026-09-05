@@ -1,8 +1,17 @@
-<html style="margin:0;padding:0;">
-<meta charset="UTF-8">
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdn.tailwindcss.com"></script>
+<!DOCTYPE html>
+<html lang="vi" style="margin:0;padding:0;">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nâng Cấp Ảnh Chuyên Nghiệp</title>
+  <meta name="description" content="Xử lý hàng loạt nhiều ảnh cùng lúc với 20+ bộ lọc cao cấp, điều chỉnh chi tiết và thuật toán nâng cấp chất lượng tiên tiến.">
+  <meta property="og:title" content="Nâng Cấp Ảnh Chuyên Nghiệp">
+  <meta property="og:description" content="Xử lý hàng loạt nhiều ảnh cùng lúc với 20+ bộ lọc cao cấp, điều chỉnh chi tiết và thuật toán nâng cấp chất lượng tiên tiến.">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body style="margin:0;padding:0;background:var(--bg,#202024);">
 <script>
 (function(){
   var s = document.createElement('style');
@@ -756,7 +765,7 @@
   // Apply current settings to selected
   function applyToSelected() {
     if (selectedImages.size === 0) {
-      alert('Vui lòng chọn ít nhất một ảnh');
+      showToast('Vui lòng chọn ít nhất một ảnh');
       return;
     }
     images.forEach(function(imgData) {
@@ -811,7 +820,7 @@
   function downloadSelected() {
     var toDownload = images.filter(function(img) { return selectedImages.has(img.id); });
     if (toDownload.length === 0) {
-      alert('Vui lòng chọn ít nhất một ảnh');
+      showToast('Vui lòng chọn ít nhất một ảnh');
       return;
     }
     toDownload.forEach(function(imgData, index) {
@@ -857,6 +866,30 @@
     link.click();
   }
 
+  // Toast notification
+  function showToast(msg) {
+    var toast = document.createElement('div');
+    toast.textContent = msg;
+    toast.style.position = 'fixed';
+    toast.style.bottom = '24px';
+    toast.style.right = '24px';
+    toast.style.background = 'var(--accent, #c47046)';
+    toast.style.color = '#202024';
+    toast.style.padding = '12px 20px';
+    toast.style.borderRadius = '10px';
+    toast.style.fontWeight = '600';
+    toast.style.fontSize = '14px';
+    toast.style.boxShadow = '0 8px 24px rgba(0,0,0,0.3)';
+    toast.style.zIndex = '9999';
+    toast.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+    document.body.appendChild(toast);
+    setTimeout(function() {
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateY(10px)';
+      setTimeout(function() { toast.remove(); }, 300);
+    }, 2500);
+  }
+
   // Format file size
   function formatFileSize(bytes) {
     var kb = bytes / 1024;
@@ -868,4 +901,5 @@
   init();
 })();
 </script>
+</body>
 </html>

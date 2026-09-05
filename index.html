@@ -1,191 +1,600 @@
 <!DOCTYPE html>
-<html lang="vi" style="margin:0;padding:0;">
+<html lang="vi" class="h-full">
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Nâng Cấp Ảnh Chuyên Nghiệp</title>
   <meta name="description" content="Xử lý hàng loạt nhiều ảnh cùng lúc với 20+ bộ lọc cao cấp, điều chỉnh chi tiết và thuật toán nâng cấp chất lượng tiên tiến.">
   <meta property="og:title" content="Nâng Cấp Ảnh Chuyên Nghiệp">
   <meta property="og:description" content="Xử lý hàng loạt nhiều ảnh cùng lúc với 20+ bộ lọc cao cấp, điều chỉnh chi tiết và thuật toán nâng cấp chất lượng tiên tiến.">
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Firebase App & Firestore SDKs (v10 compat) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <style>
+    :root {
+      --bg: #1a1a1e;
+      --card: #25252b;
+      --card-hover: #2e2e36;
+      --text: #f0ede8;
+      --muted: #a3a099;
+      --accent: #c47046;
+      --accent-soft: rgba(196, 112, 70, 0.16);
+      --accent-bright: #e08253;
+      --accent2: #7ba8b8;
+      --accent2-soft: rgba(123, 168, 184, 0.16);
+      --border: rgba(240, 237, 232, 0.12);
+      --border-active: rgba(196, 112, 70, 0.7);
+      --success: #4ade80;
+    }
+    * {
+      font-family: 'Be Vietnam Pro', 'Sora', sans-serif;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+    }
+    /* Mobile-first app container */
+    .app-container {
+      display: flex;
+      flex-direction: column;
+      height: 100dvh;
+      max-height: 100dvh;
+      overflow: hidden;
+      width: 100%;
+    }
+    .slider-track {
+      -webkit-appearance: none;
+      appearance: none;
+      height: 4px;
+      border-radius: 2px;
+      background: var(--border);
+      outline: none;
+    }
+    .slider-track::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+      border: 2px solid var(--card);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+    }
+    .slider-track::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+      border: 2px solid var(--card);
+    }
+    .tab-btn {
+      transition: all 0.2s ease;
+      cursor: pointer;
+      position: relative;
+    }
+    .tab-btn.active {
+      color: var(--text);
+      font-weight: 600;
+    }
+    .tab-btn.active::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--accent);
+      border-radius: 2px 2px 0 0;
+    }
+    .enhance-card {
+      transition: all 0.18s ease;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--card);
+      border-radius: 12px;
+      position: relative;
+      user-select: none;
+    }
+    .enhance-card:hover {
+      border-color: rgba(196, 112, 70, 0.4);
+      background: var(--card-hover);
+    }
+    .enhance-card.active {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+      box-shadow: 0 0 0 1px var(--accent), 0 4px 14px rgba(196, 112, 70, 0.25);
+    }
+    .preset-card {
+      transition: all 0.18s ease;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--card);
+    }
+    .preset-card:hover {
+      border-color: var(--accent);
+    }
+    .preset-card.active {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+      box-shadow: 0 0 0 1px var(--accent);
+    }
+    .compare-slider {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: var(--accent);
+      cursor: ew-resize;
+      z-index: 20;
+    }
+    .compare-slider-handle {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: 2px solid #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+    }
+    .scrollbar-thin::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    .scrollbar-thin::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .scrollbar-thin::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 3px;
+    }
+    .thumb-item {
+      transition: all 0.2s ease;
+      border: 2px solid transparent;
+    }
+    .thumb-item.active {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px var(--accent);
+    }
+  </style>
 </head>
-<body style="margin:0;padding:0;background:var(--bg,#202024);">
-<script>
-(function(){
-  var s = document.createElement('style');
-  s.textContent = ':root{--bg:#202024;--card:#2a2a2f;--text:#e8e5df;--muted:#9a978f;--accent:#c47046;--accent-soft:rgba(196,112,70,.14);--accent2:#7ba8b8;--accent2-soft:rgba(123,168,184,.14);--border:rgba(232,229,223,.12)}' +
-  '*{font-family:\'Be Vietnam Pro\',\'Sora\',sans-serif;}' +
-  '.reveal{opacity:0;transform:translateY(20px);animation:fadeUp .6s ease forwards}.reveal:nth-child(2){animation-delay:.1s}.reveal:nth-child(3){animation-delay:.2s}.reveal:nth-child(4){animation-delay:.3s}@keyframes fadeUp{to{opacity:1;transform:translateY(0)}}' +
-  '.filter-btn{transition:all .2s ease;cursor:pointer}.filter-btn:hover{border-color:var(--accent);transform:translateY(-1px)}.filter-btn.active{background:var(--accent-soft);border-color:var(--accent);color:var(--text)}' +
-  '.slider-track{-webkit-appearance:none;appearance:none;height:4px;border-radius:2px;background:var(--border);outline:none}.slider-track::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:16px;height:16px;border-radius:50%;background:var(--accent);cursor:pointer;border:2px solid var(--card)}' +
-  '.slider-track::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--accent);cursor:pointer;border:2px solid var(--card)}' +
-  '.drop-zone{transition:all .3s ease;border:2px dashed var(--border)}.drop-zone.dragover{border-color:var(--accent);background:var(--accent-soft)}' +
-  '.image-card{transition:all .3s ease}.image-card:hover{border-color:var(--accent)}' +
-  '.image-card.selected{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent),0 0 20px var(--accent-soft)}' +
-  '.tab-btn{transition:all .2s ease;cursor:pointer}.tab-btn.active{color:var(--text);border-bottom:2px solid var(--accent)}' +
-  '.scrollbar-thin::-webkit-scrollbar{width:6px;height:6px}.scrollbar-thin::-webkit-scrollbar-track{background:transparent}.scrollbar-thin::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}.scrollbar-thin::-webkit-scrollbar-thumb:hover{background:var(--muted)}' +
-  '.compare-slider{position:absolute;top:0;left:0;height:100%;width:3px;background:var(--accent);cursor:ew-resize;z-index:10}.compare-slider::before{content:"";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:32px;height:32px;border-radius:50%;background:var(--accent);border:3px solid var(--card)}' +
-  '.preset-card{transition:all .2s ease;cursor:pointer;border:1px solid var(--border);border-radius:10px;overflow:hidden}.preset-card:hover{border-color:var(--accent);transform:translateY(-2px)}.preset-card.active{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}';
-  document.head.appendChild(s);
-})();
-</script>
-<div style="background-color:transparent;box-sizing:border-box;">
-  <div style="color:var(--text);background:radial-gradient(1200px 600px at 80% -10%, color-mix(in srgb, var(--accent) 8%, transparent), transparent 60%), var(--bg);min-height:600px;">
-    <div class="max-w-7xl mx-auto px-6 py-8">
+<body>
 
-      <!-- Header -->
-      <div class="reveal mb-8">
-        <div style="display:flex;align-items:center;gap:14px;margin-bottom:12px;">
-          <div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#202024" stroke-width="2.5">
-              <rect x="3" y="3" width="18" height="18" rx="2"/>
-              <circle cx="8.5" cy="8.5" r="1.5"/>
-              <path d="M21 15l-5-5L5 21"/>
-            </svg>
-          </div>
-          <div>
-            <p style="font-family:monospace;font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted)">Image Enhancement Studio</p>
-            <h1 class="text-3xl font-bold" style="color:var(--text);letter-spacing:-0.02em;line-height:1.15">Nâng Cấp Ảnh Chuyên Nghiệp</h1>
-          </div>
-        </div>
-        <p style="color:var(--muted);max-width:600px" class="text-sm mt-2">Xử lý hàng loạt nhiều ảnh cùng lúc với 20+ bộ lọc cao cấp, điều chỉnh chi tiết và thuật toán nâng cấp chất lượng tiên tiến.</p>
+<div id="app" class="app-container">
+  <!-- Top Navigation Bar -->
+  <header class="flex-none h-13 px-3 sm:px-5 border-b border-[var(--border)] bg-[#1e1e22] flex items-center justify-between z-30">
+    <div class="flex items-center gap-2.5">
+      <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-[var(--accent)] to-[var(--accent2)] flex items-center justify-center shrink-0 shadow-sm">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1a1a1e" stroke-width="2.5">
+          <rect x="3" y="3" width="18" height="18" rx="2"/>
+          <circle cx="8.5" cy="8.5" r="1.5"/>
+          <path d="M21 15l-5-5L5 21"/>
+        </svg>
       </div>
-
-      <!-- Upload Zone -->
-      <div class="reveal mb-8">
-        <div id="dropZone" class="drop-zone rounded-2xl p-10 text-center" style="background:var(--card);">
-          <div style="width:64px;height:64px;border-radius:16px;background:var(--accent-soft);display:flex;align-items:center;justify-content:center;color:var(--accent);margin:0 auto 16px;">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-              <polyline points="17 8 12 3 7 8"/>
-              <line x1="12" y1="3" x2="12" y2="15"/>
-            </svg>
-          </div>
-          <h3 class="text-lg font-semibold mb-2" style="color:var(--text)">Kéo thả ảnh vào đây hoặc</h3>
-          <button id="browseBtn" style="padding:10px 24px;border-radius:10px;font-weight:600;background:var(--accent-soft);color:var(--text);border:1px solid var(--accent);cursor:pointer;font-size:14px;">Chọn Tệp Ảnh</button>
-          <input type="file" id="fileInput" multiple accept="image/*" style="display:none">
-          <p class="text-xs mt-4" style="color:var(--muted)">Hỗ trợ JPG, PNG, WebP • Xử lý hàng loạt không giới hạn số lượng • Hoàn toàn riêng tư, ảnh không tải lên server</p>
+      <div>
+        <div class="flex items-center gap-1.5">
+          <h1 class="text-sm font-bold text-[var(--text)] leading-tight tracking-tight">Nâng Cấp Ảnh</h1>
+          <span id="autoStatusBadge" class="hidden sm:inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-[var(--accent-soft)] text-[var(--accent)] border border-[rgba(196,112,70,0.3)]">
+            ✨ Auto Bật
+          </span>
         </div>
-      </div>
-
-      <!-- Main Content -->
-      <div id="mainContent" style="display:none;">
-        
-        <!-- Toolbar -->
-        <div class="reveal mb-6 rounded-2xl p-4" style="background:var(--card);border:1px solid var(--border);">
-          <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;">
-            <div style="display:flex;flex-wrap:wrap;gap:6px;">
-              <button id="selectAllBtn" class="filter-btn" style="padding:8px 16px;border-radius:8px;font-size:13px;font-weight:500;background:var(--bg);color:var(--text);border:1px solid var(--border);">Chọn tất cả</button>
-              <button id="applyAllBtn" class="filter-btn" style="padding:8px 16px;border-radius:8px;font-size:13px;font-weight:500;background:var(--accent-soft);color:var(--text);border:1px solid var(--accent);">Áp dụng cho đã chọn</button>
-              <button id="resetAllBtn" class="filter-btn" style="padding:8px 16px;border-radius:8px;font-size:13px;font-weight:500;background:var(--bg);color:var(--muted);border:1px solid var(--border);">Đặt lại</button>
-              <button id="removeSelectedBtn" class="filter-btn" style="padding:8px 16px;border-radius:8px;font-size:13px;font-weight:500;background:var(--bg);color:var(--muted);border:1px solid var(--border);">Xóa đã chọn</button>
-            </div>
-            <div style="display:flex;flex-wrap:wrap;gap:6px;">
-              <button id="downloadSelectedBtn" style="padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;background:var(--accent);color:var(--bg);border:none;cursor:pointer;">Tải xuống đã chọn</button>
-              <button id="downloadAllBtn" style="padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;background:linear-gradient(135deg,var(--accent),var(--accent2));color:var(--bg);border:none;cursor:pointer;">Tải xuống tất cả</button>
-            </div>
-          </div>
-        </div>
-
-        <div style="display:grid;grid-template-columns:1fr;gap:6px;" class="lg:grid-cols-[320px_1fr]">
-          
-          <!-- Control Panel -->
-          <div class="reveal rounded-2xl p-5" style="background:var(--card);border:1px solid var(--border);height:fit-content;position:sticky;top:16px;">
-            
-            <!-- Tabs -->
-            <div style="display:flex;gap:16px;margin-bottom:20px;border-bottom:1px solid var(--border);">
-              <div class="tab-btn active pb-3 text-sm font-medium" data-tab="presets" style="color:var(--muted);">Bộ lọc</div>
-              <div class="tab-btn pb-3 text-sm font-medium" data-tab="adjust" style="color:var(--muted);">Điều chỉnh</div>
-              <div class="tab-btn pb-3 text-sm font-medium" data-tab="enhance" style="color:var(--muted);">Nâng cấp</div>
-            </div>
-
-            <!-- Presets Tab -->
-            <div id="presetsTab" class="tab-content">
-              <p class="text-xs mb-3" style="color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;">Bộ lọc màu sắc</p>
-              <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;" id="presetGrid">
-                <!-- Presets will be rendered here -->
-              </div>
-            </div>
-
-            <!-- Adjust Tab -->
-            <div id="adjustTab" class="tab-content" style="display:none;">
-              <div id="adjustSliders" style="display:flex;flex-direction:column;gap:16px;">
-                <!-- Sliders will be rendered here -->
-              </div>
-            </div>
-
-            <!-- Enhance Tab -->
-            <div id="enhanceTab" class="tab-content" style="display:none;">
-              <p class="text-xs mb-3" style="color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;">Thuật toán nâng cấp chất lượng</p>
-              <div style="display:flex;flex-direction:column;gap:10px;">
-                <button class="enhance-btn filter-btn" data-enhance="hd" style="padding:12px;border-radius:10px;font-size:13px;font-weight:500;background:var(--bg);color:var(--text);border:1px solid var(--border);text-align:left;">
-                  <div style="display:flex;align-items:center;gap:10px;">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--accent);flex-shrink:0;"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
-                    <div><div style="font-weight:600;">Nâng cấp HD</div><div class="text-xs" style="color:var(--muted);">Tăng độ phân giải & chi tiết</div></div>
-                  </div>
-                </button>
-                <button class="enhance-btn filter-btn" data-enhance="denoise" style="padding:12px;border-radius:10px;font-size:13px;font-weight:500;background:var(--bg);color:var(--text);border:1px solid var(--border);text-align:left;">
-                  <div style="display:flex;align-items:center;gap:10px;">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--accent2);flex-shrink:0;"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
-                    <div><div style="font-weight:600;">Giảm nhiễu</div><div class="text-xs" style="color:var(--muted);">Làm mịn, loại bỏ hạt ảnh</div></div>
-                  </div>
-                </button>
-                <button class="enhance-btn filter-btn" data-enhance="sharpen" style="padding:12px;border-radius:10px;font-size:13px;font-weight:500;background:var(--bg);color:var(--text);border:1px solid var(--border);text-align:left;">
-                  <div style="display:flex;align-items:center;gap:10px;">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--accent);flex-shrink:0;"><path d="M12 2L2 22h20L12 2z"/><path d="M12 12v10"/></svg>
-                    <div><div style="font-weight:600;">Tăng sắc nét</div><div class="text-xs" style="color:var(--muted);">Unsharp Mask chuyên nghiệp</div></div>
-                  </div>
-                </button>
-                <button class="enhance-btn filter-btn" data-enhance="hdr" style="padding:12px;border-radius:10px;font-size:13px;font-weight:500;background:var(--bg);color:var(--text);border:1px solid var(--border);text-align:left;">
-                  <div style="display:flex;align-items:center;gap:10px;">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--accent2);flex-shrink:0;"><circle cx="12" cy="12" r="10"/><path d="M12 2v20M2 12h20"/></svg>
-                    <div><div style="font-weight:600;">HDR Effect</div><div class="text-xs" style="color:var(--muted);">Tăng dải tương phản động</div></div>
-                  </div>
-                </button>
-                <button class="enhance-btn filter-btn" data-enhance="auto" style="padding:12px;border-radius:10px;font-size:13px;font-weight:500;background:var(--accent-soft);color:var(--text);border:1px solid var(--accent);text-align:left;">
-                  <div style="display:flex;align-items:center;gap:10px;">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--accent);flex-shrink:0;"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
-                    <div><div style="font-weight:600;">Tự động tối ưu</div><div class="text-xs" style="color:var(--muted);">AI cân bằng màu & ánh sáng</div></div>
-                  </div>
-                </button>
-              </div>
-            </div>
-
-            <!-- Compare Mode -->
-            <div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--border);">
-              <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13px;color:var(--text);">
-                <input type="checkbox" id="compareMode" style="width:16px;height:16px;accent-color:var(--accent);">
-                <span>Chế độ so sánh Trước/Sau</span>
-              </label>
-            </div>
-          </div>
-
-          <!-- Image Grid -->
-          <div class="reveal">
-            <div id="imageGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;">
-              <!-- Image cards will be rendered here -->
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Footer -->
-      <div class="mt-16 pt-6" style="border-top:1px solid var(--border);">
-        <p class="text-center text-xs" style="color:var(--muted)">Image Enhancement Studio • Xử lý hoàn toàn trên trình duyệt của bạn • Dữ liệu 100% riêng tư</p>
+        <p class="text-[10px] text-[var(--muted)] leading-tight hidden xs:block">Studio tối ưu di động & máy tính</p>
       </div>
     </div>
-  </div>
+
+    <!-- Quick Actions in Header -->
+    <div class="flex items-center gap-1.5 sm:gap-2">
+      <button id="headerCloudBtn" title="Lịch sử 20 ảnh đã lưu trên Cloud" class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-[var(--card)] text-[var(--accent2)] border border-[var(--border)] hover:border-[var(--accent2)] transition-all">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/>
+        </svg>
+        <span class="hidden xs:inline">Đã lưu (<span id="cloudCountBadge">0</span>)</span>
+      </button>
+
+      <button id="headerUploadBtn" class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-[var(--card)] text-[var(--text)] border border-[var(--border)] hover:border-[var(--accent)] transition-all">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 5v14M5 12h14"/>
+        </svg>
+        <span class="hidden xs:inline">Thêm ảnh</span>
+      </button>
+
+      <div id="headerActionsLoaded" style="display: none;" class="flex items-center gap-1.5">
+        <button id="headerDownloadBtn" class="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[var(--accent)] text-[#1a1a1e] hover:brightness-110 shadow-sm transition-all">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          <span>Tải ảnh</span>
+        </button>
+      </div>
+      <input type="file" id="fileInput" multiple accept="image/*" class="hidden">
+    </div>
+  </header>
+
+  <!-- Empty State / Upload Screen -->
+  <main id="emptyState" class="flex-1 overflow-y-auto px-4 py-6 flex flex-col items-center justify-center text-center">
+    <div class="w-full max-w-md mx-auto flex flex-col items-center">
+      <div id="dropZone" class="w-full rounded-2xl p-6 sm:p-8 text-center border-2 border-dashed border-[var(--border)] bg-[var(--card)] hover:border-[var(--accent)] transition-all cursor-pointer">
+        <div class="w-14 h-14 rounded-2xl bg-[var(--accent-soft)] flex items-center justify-center text-[var(--accent)] mx-auto mb-4">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+        </div>
+        <h2 class="text-base sm:text-lg font-bold text-[var(--text)] mb-1">Chọn hoặc Kéo thả ảnh vào đây</h2>
+        <p class="text-xs text-[var(--muted)] mb-4">Hỗ trợ JPG, PNG, WebP • Tự động tối ưu ngay khi chọn</p>
+        <div class="flex flex-col sm:flex-row gap-2 justify-center">
+          <button id="browseBtn" class="px-5 py-2.5 rounded-xl font-semibold bg-[var(--accent)] text-[#1a1a1e] text-xs sm:text-sm hover:brightness-110 transition-all">
+            Chọn Tệp Ảnh
+          </button>
+          <button id="demoBtn" class="px-4 py-2.5 rounded-xl font-medium bg-[var(--bg)] text-[var(--text)] border border-[var(--border)] text-xs sm:text-sm hover:border-[var(--accent)] transition-all">
+            ✨ Thử Với Ảnh Mẫu
+          </button>
+        </div>
+      </div>
+
+      <!-- Feature highlights -->
+      <div class="grid grid-cols-2 gap-2.5 w-full mt-5">
+        <div class="p-3 rounded-xl bg-[var(--card)] border border-[var(--border)] text-left flex items-start gap-2">
+          <span class="text-sm text-[var(--accent)]">✨</span>
+          <div>
+            <div class="text-xs font-semibold text-[var(--text)]">Tự động tối ưu</div>
+            <div class="text-[10px] text-[var(--muted)]">Tự động cân bằng sáng & màu</div>
+          </div>
+        </div>
+        <div class="p-3 rounded-xl bg-[var(--card)] border border-[var(--border)] text-left flex items-start gap-2">
+          <span class="text-sm text-[var(--accent)]">💎</span>
+          <div>
+            <div class="text-xs font-semibold text-[var(--text)]">Nâng cấp HD</div>
+            <div class="text-[10px] text-[var(--muted)]">Tăng rõ nét & chi tiết cao</div>
+          </div>
+        </div>
+        <div class="p-3 rounded-xl bg-[var(--card)] border border-[var(--border)] text-left flex items-start gap-2">
+          <span class="text-sm text-[var(--accent2)]">🛡️</span>
+          <div>
+            <div class="text-xs font-semibold text-[var(--text)]">Khử nhiễu</div>
+            <div class="text-[10px] text-[var(--muted)]">Làm mịn màng, giảm hạt ISO</div>
+          </div>
+        </div>
+        <div class="p-3 rounded-xl bg-[var(--card)] border border-[var(--border)] text-left flex items-start gap-2">
+          <span class="text-sm text-[var(--accent2)]">🌅</span>
+          <div>
+            <div class="text-xs font-semibold text-[var(--text)]">Hiệu ứng HDR</div>
+            <div class="text-[10px] text-[var(--muted)]">Cân bằng vùng sáng & tối</div>
+          </div>
+        </div>
+      </div>
+      <p class="text-[11px] text-[var(--muted)] mt-4">100% riêng tư: xử lý trực tiếp trên thiết bị của bạn</p>
+
+      <!-- Cloud Stored Images Section (Recent 20) -->
+      <div id="emptyCloudSection" style="display: none;" class="w-full mt-6 text-left border-t border-[var(--border)] pt-5">
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-1.5">
+            <span class="text-sm">☁️</span>
+            <span class="text-xs font-semibold text-[var(--text)]">20 Ảnh Gần Nhất Trên Cloud</span>
+            <span id="emptyCloudBadge" class="text-[10px] px-1.5 py-0.5 rounded-full bg-[var(--accent2-soft)] text-[var(--accent2)] font-mono">0/20</span>
+          </div>
+          <span class="text-[10px] text-[var(--muted)]">Nhấn để mở và sửa tiếp</span>
+        </div>
+        <div id="emptyCloudGrid" class="grid grid-cols-4 sm:grid-cols-5 gap-2 max-h-48 overflow-y-auto pr-1">
+          <!-- Loaded thumbnails will be injected here -->
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Active Studio Workspace (Mobile-Optimized Viewport Layout) -->
+  <main id="studioWorkspace" style="display: none;" class="flex-1 flex flex-col md:flex-row overflow-hidden w-full">
+    
+    <!-- LEFT / TOP: Image Preview Stage -->
+    <section class="flex-none md:flex-1 h-[42vh] sm:h-[46vh] md:h-auto border-b md:border-b-0 md:border-r border-[var(--border)] bg-[#141417] flex flex-col relative overflow-hidden">
+      
+      <!-- Preview Stage Header / Overlays -->
+      <div class="absolute top-2 left-2 right-2 flex items-center justify-between z-20 pointer-events-none">
+        <div class="flex items-center gap-1.5">
+          <span id="activeBadge" class="pointer-events-auto inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-[rgba(32,32,36,0.85)] text-[var(--text)] border border-[var(--accent)] backdrop-blur-md shadow-md">
+            ✨ Tự động tối ưu
+          </span>
+          <span id="dimBadge" class="pointer-events-auto inline-flex items-center px-2 py-1 rounded-md text-[10px] font-mono bg-[rgba(32,32,36,0.7)] text-[var(--muted)] backdrop-blur-md">
+            1920×1080
+          </span>
+        </div>
+
+        <div class="flex items-center gap-1.5 pointer-events-auto">
+          <!-- Split compare toggle -->
+          <button id="splitCompareBtn" title="Bật/Tắt thanh trượt so sánh" class="px-2 py-1 rounded-lg text-xs font-medium bg-[rgba(32,32,36,0.85)] text-[var(--text)] border border-[var(--border)] backdrop-blur-md hover:border-[var(--accent)] flex items-center gap-1">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+              <line x1="12" y1="3" x2="12" y2="21"/>
+            </svg>
+            <span class="hidden sm:inline">So sánh</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Canvas Display Area -->
+      <div id="canvasContainer" class="flex-1 relative w-full h-full flex items-center justify-center p-2 select-none overflow-hidden">
+        <!-- Main processed canvas -->
+        <canvas id="mainCanvas" class="max-h-full max-w-full object-contain rounded-lg shadow-lg block"></canvas>
+        
+        <!-- Original image comparison overlay (for split slider) -->
+        <div id="splitOverlay" style="display: none;" class="absolute inset-0 flex items-center justify-center p-2 pointer-events-none overflow-hidden">
+          <div id="splitClipper" class="relative max-h-full max-w-full overflow-hidden flex items-center justify-center" style="width: 100%; height: 100%;">
+            <img id="originalImgEl" class="max-h-full max-w-full object-contain pointer-events-none select-none block" style="clip-path: inset(0 50% 0 0);">
+            <div id="splitSliderBar" class="compare-slider" style="left: 50%;">
+              <div class="compare-slider-handle">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1a1a1e" stroke-width="2.5">
+                  <polyline points="8 17 3 12 8 7"/>
+                  <polyline points="16 7 21 12 16 17"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Touch & Hold to View Original Button (Super convenient on mobile) -->
+        <button id="holdCompareBtn" class="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-[rgba(26,26,30,0.88)] text-[var(--text)] border border-[rgba(240,237,232,0.2)] backdrop-blur-md shadow-lg flex items-center gap-1.5 active:scale-95 active:bg-[var(--accent)] active:text-[#1a1a1e] transition-all cursor-pointer">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+          <span id="holdCompareText">Giữ xem ảnh gốc</span>
+        </button>
+      </div>
+
+      <!-- Multiple Images Strip (Filmstrip) -->
+      <div id="filmstripContainer" class="flex-none h-12 bg-[#1b1b1f] border-t border-[var(--border)] px-2 flex items-center gap-2 overflow-x-auto scrollbar-thin">
+        <div id="filmstrip" class="flex items-center gap-2">
+          <!-- Thumbnails rendered dynamically -->
+        </div>
+        <button id="addMoreBtn" class="h-8 px-2 rounded-lg bg-[var(--card)] hover:bg-[var(--card-hover)] border border-[var(--border)] text-xs text-[var(--muted)] flex items-center gap-1 shrink-0">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 5v14M5 12h14"/>
+          </svg>
+          <span>Thêm</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- RIGHT / BOTTOM: Controls Deck (Tabs & Tools) -->
+    <section class="flex-1 md:w-[380px] lg:w-[420px] md:flex-none flex flex-col bg-[var(--card)] overflow-hidden">
+      
+      <!-- Studio Tabs Row -->
+      <div class="flex-none h-11 px-2 sm:px-3 border-b border-[var(--border)] bg-[#202025] flex items-center justify-around gap-1">
+        <button class="tab-btn active flex-1 h-full text-xs font-medium text-[var(--muted)] flex items-center justify-center gap-1" data-tab="enhance">
+          <span>✨ Nâng cấp</span>
+        </button>
+        <button class="tab-btn flex-1 h-full text-xs font-medium text-[var(--muted)] flex items-center justify-center gap-1" data-tab="presets">
+          <span>🎨 Bộ lọc</span>
+        </button>
+        <button class="tab-btn flex-1 h-full text-xs font-medium text-[var(--muted)] flex items-center justify-center gap-1" data-tab="adjust">
+          <span>⚙️ Chỉnh</span>
+        </button>
+        <button class="tab-btn flex-1 h-full text-xs font-medium text-[var(--muted)] flex items-center justify-center gap-1 text-[var(--accent2)]" data-tab="history">
+          <span>☁️ Lưu trữ</span>
+        </button>
+      </div>
+
+      <!-- Tab Content Panels (Scrollable within this lower deck) -->
+      <div class="flex-1 overflow-y-auto scrollbar-thin p-3 sm:p-4">
+
+        <!-- TAB 1: NÂNG CẤP (ENHANCE) - ACTIVE BY DEFAULT -->
+        <div id="enhanceTab" class="tab-content flex flex-col gap-3">
+          
+          <!-- Intensity slider for current enhancement -->
+          <div class="p-3 rounded-xl bg-[var(--bg)] border border-[var(--border)]">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-medium text-[var(--text)]">Cường độ hiệu ứng</span>
+              <span id="enhanceIntensityVal" class="text-xs font-mono text-[var(--accent)] font-semibold">100%</span>
+            </div>
+            <input type="range" id="enhanceIntensity" class="slider-track w-full" min="0" max="100" value="100">
+            <div class="flex justify-between text-[10px] text-[var(--muted)] mt-1">
+              <span>0% (Ảnh gốc)</span>
+              <span>50%</span>
+              <span>100% (Chuẩn)</span>
+            </div>
+          </div>
+
+          <!-- Enhancement feature cards -->
+          <div class="grid grid-cols-2 gap-2">
+            
+            <!-- 1. Auto Enhance (Default active) -->
+            <div class="enhance-card active p-3" data-enhance="auto">
+              <div class="flex items-center justify-between mb-1.5">
+                <div class="w-7 h-7 rounded-lg bg-[var(--accent-soft)] flex items-center justify-center text-[var(--accent)] font-bold text-sm">
+                  ✨
+                </div>
+                <span class="active-indicator text-[10px] font-semibold text-[var(--accent)] bg-[rgba(196,112,70,0.18)] px-1.5 py-0.5 rounded">
+                  Đang bật
+                </span>
+              </div>
+              <div class="text-xs font-bold text-[var(--text)]">Tự Động Tối Ưu</div>
+              <div class="text-[10px] text-[var(--muted)] leading-tight mt-0.5">AI cân bằng màu, sáng & tương phản</div>
+            </div>
+
+            <!-- 2. HD Enhance -->
+            <div class="enhance-card p-3" data-enhance="hd">
+              <div class="flex items-center justify-between mb-1.5">
+                <div class="w-7 h-7 rounded-lg bg-[var(--accent-soft)] flex items-center justify-center text-[var(--accent)] font-bold text-sm">
+                  💎
+                </div>
+                <span class="active-indicator hidden text-[10px] font-semibold text-[var(--accent)] bg-[rgba(196,112,70,0.18)] px-1.5 py-0.5 rounded">
+                  Đang bật
+                </span>
+              </div>
+              <div class="text-xs font-bold text-[var(--text)]">Nâng Cấp HD</div>
+              <div class="text-[10px] text-[var(--muted)] leading-tight mt-0.5">Tăng độ nét vi mô & chiều sâu chi tiết</div>
+            </div>
+
+            <!-- 3. Denoise -->
+            <div class="enhance-card p-3" data-enhance="denoise">
+              <div class="flex items-center justify-between mb-1.5">
+                <div class="w-7 h-7 rounded-lg bg-[var(--accent2-soft)] flex items-center justify-center text-[var(--accent2)] font-bold text-sm">
+                  🛡️
+                </div>
+                <span class="active-indicator hidden text-[10px] font-semibold text-[var(--accent)] bg-[rgba(196,112,70,0.18)] px-1.5 py-0.5 rounded">
+                  Đang bật
+                </span>
+              </div>
+              <div class="text-xs font-bold text-[var(--text)]">Giảm Nhiễu</div>
+              <div class="text-[10px] text-[var(--muted)] leading-tight mt-0.5">Khử hạt noise, làm mịn màng tự nhiên</div>
+            </div>
+
+            <!-- 4. Sharpen -->
+            <div class="enhance-card p-3" data-enhance="sharpen">
+              <div class="flex items-center justify-between mb-1.5">
+                <div class="w-7 h-7 rounded-lg bg-[var(--accent-soft)] flex items-center justify-center text-[var(--accent)] font-bold text-sm">
+                  ⚡
+                </div>
+                <span class="active-indicator hidden text-[10px] font-semibold text-[var(--accent)] bg-[rgba(196,112,70,0.18)] px-1.5 py-0.5 rounded">
+                  Đang bật
+                </span>
+              </div>
+              <div class="text-xs font-bold text-[var(--text)]">Tăng Sắc Nét</div>
+              <div class="text-[10px] text-[var(--muted)] leading-tight mt-0.5">Unsharp Mask làm sắc cạnh mọi chi tiết</div>
+            </div>
+
+            <!-- 5. HDR Effect -->
+            <div class="enhance-card p-3" data-enhance="hdr">
+              <div class="flex items-center justify-between mb-1.5">
+                <div class="w-7 h-7 rounded-lg bg-[var(--accent2-soft)] flex items-center justify-center text-[var(--accent2)] font-bold text-sm">
+                  🌅
+                </div>
+                <span class="active-indicator hidden text-[10px] font-semibold text-[var(--accent)] bg-[rgba(196,112,70,0.18)] px-1.5 py-0.5 rounded">
+                  Đang bật
+                </span>
+              </div>
+              <div class="text-xs font-bold text-[var(--text)]">Hiệu Ứng HDR</div>
+              <div class="text-[10px] text-[var(--muted)] leading-tight mt-0.5">Cứu vùng tối, làm dịu vùng chói gắt</div>
+            </div>
+
+            <!-- 6. Original -->
+            <div class="enhance-card p-3" data-enhance="original">
+              <div class="flex items-center justify-between mb-1.5">
+                <div class="w-7 h-7 rounded-lg bg-[#2f2f36] flex items-center justify-center text-[var(--muted)] font-bold text-sm">
+                  🔄
+                </div>
+                <span class="active-indicator hidden text-[10px] font-semibold text-[var(--accent)] bg-[rgba(196,112,70,0.18)] px-1.5 py-0.5 rounded">
+                  Đang bật
+                </span>
+              </div>
+              <div class="text-xs font-bold text-[var(--text)]">Ảnh Gốc</div>
+              <div class="text-[10px] text-[var(--muted)] leading-tight mt-0.5">Tắt mọi hiệu ứng nâng cấp</div>
+            </div>
+
+          </div>
+
+          <!-- Batch toggle -->
+          <div class="p-2.5 rounded-xl bg-[var(--bg)] border border-[var(--border)] flex items-center justify-between">
+            <label class="flex items-center gap-2 cursor-pointer text-xs text-[var(--text)]">
+              <input type="checkbox" id="applyAllCheckbox" checked class="w-4 h-4 accent-[var(--accent)] rounded">
+              <span>Đồng bộ hiệu ứng cho tất cả ảnh</span>
+            </label>
+            <span class="text-[10px] text-[var(--muted)]">Hàng loạt</span>
+          </div>
+        </div>
+
+        <!-- TAB 2: BỘ LỌC (PRESETS) -->
+        <div id="presetsTab" class="tab-content hidden">
+          <div class="grid grid-cols-3 gap-2" id="presetGrid">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+        <!-- TAB 3: TINH CHỈNH (ADJUST) -->
+        <div id="adjustTab" class="tab-content hidden flex flex-col gap-3">
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-xs text-[var(--muted)] uppercase tracking-wider font-semibold">Thông số thủ công</span>
+            <button id="resetAdjustBtn" class="text-xs text-[var(--accent)] hover:underline font-medium">Đặt lại chỉnh sửa</button>
+          </div>
+          <div id="adjustSliders" class="flex flex-col gap-3">
+            <!-- Sliders rendered by JS -->
+          </div>
+        </div>
+
+        <!-- TAB 4: LƯU TRỮ CLOUD (20 ẢNH GẦN NHẤT) -->
+        <div id="historyTab" class="tab-content hidden flex flex-col gap-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-1.5">
+              <span class="text-sm">☁️</span>
+              <span class="text-xs font-semibold text-[var(--text)]">Cloud Firestore (20 gần nhất)</span>
+            </div>
+            <button id="refreshCloudBtn" class="text-[11px] text-[var(--accent2)] hover:underline flex items-center gap-1">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M23 4v6h-6M1 20v-6h6"/>
+                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+              </svg>
+              <span>Làm mới</span>
+            </button>
+          </div>
+          <p class="text-[11px] text-[var(--muted)] leading-relaxed">
+            Mỗi ảnh bạn tải lên và xử lý sẽ tự động lưu lại trên Firebase Firestore. Bấm vào ảnh bất kỳ để mở lại và tiếp tục chỉnh sửa.
+          </p>
+          <div id="cloudHistoryList" class="flex flex-col gap-2">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Bottom Action Footer (Safe Area on Mobile) -->
+      <footer class="flex-none p-3 border-t border-[var(--border)] bg-[#1e1e22] flex items-center justify-between gap-2">
+        <button id="footerResetBtn" class="px-3 py-2 rounded-xl text-xs font-medium bg-[var(--card)] text-[var(--muted)] hover:text-[var(--text)] border border-[var(--border)] transition-all">
+          Đặt lại
+        </button>
+
+        <div class="flex items-center gap-2 flex-1 justify-end">
+          <button id="footerDownloadAllBtn" style="display: none;" class="px-3 py-2 rounded-xl text-xs font-semibold bg-[var(--card)] text-[var(--text)] border border-[var(--border)] hover:border-[var(--accent)] transition-all">
+            Tải tất cả (<span id="allCount">0</span>)
+          </button>
+          <button id="footerDownloadBtn" class="flex-1 sm:flex-none px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-[var(--accent)] text-[#1a1a1e] hover:brightness-110 shadow-md flex items-center justify-center gap-1.5 transition-all">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            <span>Tải Ảnh Xuống</span>
+          </button>
+        </div>
+      </footer>
+    </section>
+
+  </main>
 </div>
 
 <script>
-(function(){
-  // State management
+(function() {
+  'use strict';
+
+  // App State
   var images = [];
-  var selectedImages = new Set();
-  var currentSettings = {
-    preset: null,
+  var currentImageIndex = 0;
+  var activeEnhancement = 'auto'; // Default is AUTO
+  var enhancementIntensity = 1.0;
+  var isComparing = false;
+  var isSplitComparing = false;
+
+  // Base settings definition
+  var defaultSettings = {
     brightness: 100,
     contrast: 100,
     saturation: 100,
@@ -200,704 +609,1275 @@
     tint: 0,
     gamma: 100,
     exposure: 0,
-    highlights: 0,
-    shadows: 0
+    shadows: 0,
+    highlights: 0
   };
 
-  // Preset definitions
+  var currentSettings = Object.assign({}, defaultSettings);
+
+  // Photographic Presets
   var presets = [
-    { name: 'Gốc', icon: 'original', filters: {} },
-    { name: 'Vivid', icon: 'vivid', filters: { saturation: 130, contrast: 110, vibrance: 120 } },
-    { name: 'Mềm', icon: 'soft', filters: { brightness: 105, saturation: 90, contrast: 95 } },
-    { name: 'Ấm', icon: 'warm', filters: { temperature: 20, saturation: 105, sepia: 10 } },
-    { name: 'Lạnh', icon: 'cool', filters: { temperature: -20, tint: 10, saturation: 105 } },
-    { name: 'ĐenTrắng', icon: 'bw', filters: { grayscale: 100, contrast: 110, brightness: 100 } },
-    { name: 'Cổ điển', icon: 'vintage', filters: { sepia: 30, saturation: 80, contrast: 95, temperature: 15 } },
-    { name: 'Phim', icon: 'film', filters: { contrast: 108, saturation: 95, brightness: 102, sepia: 5 } },
-    { name: 'Noir', icon: 'noir', filters: { grayscale: 100, contrast: 125, brightness: 95 } },
-    { name: 'Hoàng hôn', icon: 'sunset', filters: { temperature: 30, saturation: 120, tint: 15, brightness: 105 } },
-    { name: 'Mát mẻ', icon: 'ocean', filters: { temperature: -15, saturation: 110, tint: -10, brightness: 102 } },
-    { name: 'Rực rỡ', icon: 'dramatic', filters: { contrast: 120, saturation: 115, brightness: 98, vibrance: 130 } }
+    { name: 'Gốc', id: 'original', filters: {} },
+    { name: 'Vivid', id: 'vivid', filters: { saturation: 125, contrast: 110, vibrance: 120 } },
+    { name: 'Mềm', id: 'soft', filters: { brightness: 105, saturation: 92, contrast: 95 } },
+    { name: 'Ấm Áp', id: 'warm', filters: { temperature: 20, saturation: 106, sepia: 8 } },
+    { name: 'Lạnh Lẽo', id: 'cool', filters: { temperature: -20, tint: 10, saturation: 105 } },
+    { name: 'Đen Trắng', id: 'bw', filters: { grayscale: 100, contrast: 115, brightness: 102 } },
+    { name: 'Cổ Điển', id: 'vintage', filters: { sepia: 28, saturation: 85, contrast: 96, temperature: 12 } },
+    { name: 'Phim Nhựa', id: 'film', filters: { contrast: 108, saturation: 95, brightness: 102, sepia: 6 } },
+    { name: 'Noir Bí Ẩn', id: 'noir', filters: { grayscale: 100, contrast: 130, brightness: 94 } },
+    { name: 'Hoàng Hôn', id: 'sunset', filters: { temperature: 28, saturation: 118, tint: 14, brightness: 104 } },
+    { name: 'Biển Xanh', id: 'ocean', filters: { temperature: -16, saturation: 110, tint: -8, brightness: 102 } },
+    { name: 'Điện Ảnh', id: 'dramatic', filters: { contrast: 122, saturation: 112, brightness: 98, vibrance: 125 } }
   ];
 
   // DOM Elements
-  var dropZone = document.getElementById('dropZone');
   var fileInput = document.getElementById('fileInput');
+  var dropZone = document.getElementById('dropZone');
   var browseBtn = document.getElementById('browseBtn');
-  var mainContent = document.getElementById('mainContent');
-  var imageGrid = document.getElementById('imageGrid');
+  var headerUploadBtn = document.getElementById('headerUploadBtn');
+  var addMoreBtn = document.getElementById('addMoreBtn');
+  var demoBtn = document.getElementById('demoBtn');
+  var emptyState = document.getElementById('emptyState');
+  var studioWorkspace = document.getElementById('studioWorkspace');
+  var mainCanvas = document.getElementById('mainCanvas');
+  var originalImgEl = document.getElementById('originalImgEl');
+  var splitOverlay = document.getElementById('splitOverlay');
+  var splitSliderBar = document.getElementById('splitSliderBar');
+  var splitCompareBtn = document.getElementById('splitCompareBtn');
+  var holdCompareBtn = document.getElementById('holdCompareBtn');
+  var holdCompareText = document.getElementById('holdCompareText');
+  var activeBadge = document.getElementById('activeBadge');
+  var dimBadge = document.getElementById('dimBadge');
+  var filmstrip = document.getElementById('filmstrip');
+  var filmstripContainer = document.getElementById('filmstripContainer');
   var presetGrid = document.getElementById('presetGrid');
   var adjustSliders = document.getElementById('adjustSliders');
+  var headerActionsLoaded = document.getElementById('headerActionsLoaded');
+  var headerDownloadBtn = document.getElementById('headerDownloadBtn');
+  var footerDownloadBtn = document.getElementById('footerDownloadBtn');
+  var footerDownloadAllBtn = document.getElementById('footerDownloadAllBtn');
+  var footerResetBtn = document.getElementById('footerResetBtn');
+  var resetAdjustBtn = document.getElementById('resetAdjustBtn');
+  var enhanceIntensity = document.getElementById('enhanceIntensity');
+  var enhanceIntensityVal = document.getElementById('enhanceIntensityVal');
+  var applyAllCheckbox = document.getElementById('applyAllCheckbox');
+  var allCount = document.getElementById('allCount');
+  var headerCloudBtn = document.getElementById('headerCloudBtn');
+  var cloudCountBadge = document.getElementById('cloudCountBadge');
+  var emptyCloudSection = document.getElementById('emptyCloudSection');
+  var emptyCloudGrid = document.getElementById('emptyCloudGrid');
+  var emptyCloudBadge = document.getElementById('emptyCloudBadge');
+  var refreshCloudBtn = document.getElementById('refreshCloudBtn');
+  var cloudHistoryList = document.getElementById('cloudHistoryList');
+
+  // Firebase Firestore Configuration & Initialization
+  var firebaseConfig = {
+    projectId: "hopeful-subject-395103",
+    appId: "1:127979617226:web:2534b4e0d42c22d455ad33",
+    apiKey: "AIzaSyD7OI9PrHA4RaU2lZM0o5TkqvNtoPIdLRk",
+    authDomain: "hopeful-subject-395103.firebaseapp.com",
+    firestoreDatabaseId: "ai-studio-enhances-c505d4f8-6bd6-4976-a0ba-96b5564ee4a9",
+    storageBucket: "hopeful-subject-395103.firebasestorage.app"
+  };
+
+  var firestoreDb = null;
+  var cachedCloudImages = [];
+
+  function initFirebase() {
+    try {
+      if (window.firebase && !window.firebase.apps.length) {
+        window.firebase.initializeApp(firebaseConfig);
+        firestoreDb = window.firebase.firestore();
+        // If specific named database ID is configured
+        if (firebaseConfig.firestoreDatabaseId && typeof firestoreDb.databaseId !== 'undefined') {
+          // default instance is standard
+        }
+      } else if (window.firebase) {
+        firestoreDb = window.firebase.firestore();
+      }
+      loadRecentCloudImages();
+    } catch (err) {
+      console.warn('Firebase init error:', err);
+    }
+  }
+
+  // Generate an optimized thumbnail Base64 (max 280px) to store reliably in Firestore
+  function createOptimizedThumbnail(sourceImgOrCanvas, maxDim) {
+    maxDim = maxDim || 280;
+    var thumbCanvas = document.createElement('canvas');
+    var w = sourceImgOrCanvas.width || sourceImgOrCanvas.naturalWidth || 200;
+    var h = sourceImgOrCanvas.height || sourceImgOrCanvas.naturalHeight || 200;
+    var scale = Math.min(maxDim / w, maxDim / h, 1);
+    thumbCanvas.width = Math.round(w * scale);
+    thumbCanvas.height = Math.round(h * scale);
+    var tCtx = thumbCanvas.getContext('2d');
+    tCtx.drawImage(sourceImgOrCanvas, 0, 0, thumbCanvas.width, thumbCanvas.height);
+    return thumbCanvas.toDataURL('image/jpeg', 0.82);
+  }
+
+  // Save or update an image to Firestore (enforcing the 20 most recent limit)
+  function saveImageToCloud(imgObj) {
+    if (!firestoreDb) return;
+    try {
+      var thumbData = createOptimizedThumbnail(imgObj.originalCanvas || imgObj.img, 280);
+      var docId = String(imgObj.cloudDocId || ('img_' + Date.now() + '_' + Math.floor(Math.random() * 1000)));
+      imgObj.cloudDocId = docId;
+
+      var dataToSave = {
+        name: imgObj.name || 'anh_nang_cap.jpg',
+        fileSize: imgObj.fileSize || 0,
+        width: imgObj.width || 0,
+        height: imgObj.height || 0,
+        thumbnailUrl: thumbData,
+        enhancementMode: imgObj.activeMode || 'auto',
+        presetId: imgObj.activePreset || 'Gốc',
+        intensity: enhancementIntensity || 0.85,
+        updatedAt: window.firebase.firestore.FieldValue.serverTimestamp(),
+        createdAt: imgObj.createdAt || window.firebase.firestore.FieldValue.serverTimestamp()
+      };
+
+      var colRef = firestoreDb.collection('images');
+      colRef.doc(docId).set(dataToSave, { merge: true })
+        .then(function() {
+          pruneCloudImagesToMax20();
+          loadRecentCloudImages(false);
+        })
+        .catch(function(err) {
+          console.warn('Could not save to Cloud Firestore:', err);
+        });
+    } catch (e) {
+      console.warn('saveImageToCloud exception:', e);
+    }
+  }
+
+  // Keep only the 20 most recent images on Firestore
+  function pruneCloudImagesToMax20() {
+    if (!firestoreDb) return;
+    firestoreDb.collection('images')
+      .orderBy('updatedAt', 'desc')
+      .get()
+      .then(function(snapshot) {
+        if (snapshot.size > 20) {
+          var docs = snapshot.docs;
+          // Delete older documents past the 20th
+          for (var i = 20; i < docs.length; i++) {
+            docs[i].ref.delete().catch(function(){});
+          }
+        }
+      })
+      .catch(function(err) {
+        console.warn('prune error:', err);
+      });
+  }
+
+  // Load the 20 most recent images from Firestore
+  function loadRecentCloudImages(showSpinner) {
+    if (!firestoreDb) return;
+    if (showSpinner) {
+      if (cloudHistoryList) cloudHistoryList.innerHTML = '<div class="text-xs text-[var(--muted)] text-center py-4">Đang tải lịch sử đám mây...</div>';
+    }
+
+    firestoreDb.collection('images')
+      .orderBy('updatedAt', 'desc')
+      .limit(20)
+      .get()
+      .then(function(snapshot) {
+        cachedCloudImages = [];
+        snapshot.forEach(function(doc) {
+          var data = doc.data();
+          data.docId = doc.id;
+          cachedCloudImages.push(data);
+        });
+        updateCloudUI();
+      })
+      .catch(function(err) {
+        console.warn('Fetch recent images error:', err);
+        // If index is building or order fails, fallback to simple limit query
+        firestoreDb.collection('images').limit(20).get().then(function(snap) {
+          cachedCloudImages = [];
+          snap.forEach(function(doc) {
+            var d = doc.data();
+            d.docId = doc.id;
+            cachedCloudImages.push(d);
+          });
+          updateCloudUI();
+        }).catch(function(){});
+      });
+  }
+
+  // Update Cloud UI in Header, Empty State, and History Tab
+  function updateCloudUI() {
+    var count = cachedCloudImages.length;
+    if (cloudCountBadge) cloudCountBadge.textContent = count;
+    if (emptyCloudBadge) emptyCloudBadge.textContent = count + '/20';
+
+    // Show empty state cloud section if any images exist
+    if (emptyCloudSection && emptyCloudGrid) {
+      if (count > 0) {
+        emptyCloudSection.style.display = 'block';
+        emptyCloudGrid.innerHTML = cachedCloudImages.map(function(item) {
+          var safeName = escapeHtml(item.name || 'Ảnh');
+          return '<div class="group relative rounded-xl overflow-hidden border border-[var(--border)] bg-[#1e1e22] aspect-square cursor-pointer hover:border-[var(--accent2)] transition-all flex flex-col justify-end p-1.5" onclick="window.openCloudImage(\'' + item.docId + '\')">' +
+            '<img src="' + item.thumbnailUrl + '" class="absolute inset-0 w-full h-full object-cover" alt="' + safeName + '" loading="lazy">' +
+            '<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>' +
+            '<div class="relative z-10 text-[9px] text-[var(--text)] truncate font-medium">' + safeName + '</div>' +
+          '</div>';
+        }).join('');
+      } else {
+        emptyCloudSection.style.display = 'none';
+      }
+    }
+
+    // Update History Tab List
+    if (cloudHistoryList) {
+      if (count === 0) {
+        cloudHistoryList.innerHTML = '<div class="text-xs text-[var(--muted)] text-center py-8 rounded-xl border border-dashed border-[var(--border)] bg-[#1b1b1f]">' +
+          'Chưa có ảnh nào được lưu trữ trên Cloud.<br><span class="text-[10px]">Tải ảnh lên hoặc thử ảnh mẫu để tự động lưu!</span>' +
+        '</div>';
+      } else {
+        cloudHistoryList.innerHTML = cachedCloudImages.map(function(item) {
+          var safeName = escapeHtml(item.name || 'Ảnh đã lưu');
+          var modeLabel = item.enhancementMode === 'auto' ? '✨ Tự động' : item.enhancementMode === 'hd' ? '💎 Nâng cấp HD' : item.enhancementMode === 'denoise' ? '🛡️ Khử nhiễu' : item.enhancementMode === 'hdr' ? '🌅 HDR' : 'Gốc';
+          return '<div class="flex items-center gap-2.5 p-2 rounded-xl bg-[#202025] border border-[var(--border)] hover:border-[var(--accent2)] transition-all cursor-pointer group" onclick="window.openCloudImage(\'' + item.docId + '\')">' +
+            '<div class="w-12 h-12 rounded-lg overflow-hidden bg-black/40 shrink-0 relative border border-[var(--border)]">' +
+              '<img src="' + item.thumbnailUrl + '" class="w-full h-full object-cover" alt="' + safeName + '" loading="lazy">' +
+            '</div>' +
+            '<div class="flex-1 min-w-0">' +
+              '<div class="text-xs font-semibold text-[var(--text)] truncate group-hover:text-[var(--accent2)] transition-colors">' + safeName + '</div>' +
+              '<div class="flex items-center gap-1.5 mt-0.5">' +
+                '<span class="text-[10px] px-1.5 py-0.2 rounded bg-[var(--accent2-soft)] text-[var(--accent2)] font-medium">' + modeLabel + '</span>' +
+                '<span class="text-[10px] text-[var(--muted)] font-mono">' + (item.width || 0) + '×' + (item.height || 0) + '</span>' +
+              '</div>' +
+            '</div>' +
+            '<button class="px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--card)] text-[var(--text)] border border-[var(--border)] group-hover:border-[var(--accent2)] shrink-0">' +
+              'Mở lại' +
+            '</button>' +
+          '</div>';
+        }).join('');
+      }
+    }
+  }
+
+  // Helper escape HTML
+  function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, function(m) {
+      return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m];
+    });
+  }
+
+  // Expose openCloudImage to global window for click handlers
+  window.openCloudImage = function(docId) {
+    var found = cachedCloudImages.find(function(c) { return c.docId === docId; });
+    if (!found) return;
+
+    showToast('Đang mở ảnh từ Cloud: ' + found.name);
+    var img = new Image();
+    img.onload = function() {
+      var offCanvas = document.createElement('canvas');
+      offCanvas.width = img.width;
+      offCanvas.height = img.height;
+      var offCtx = offCanvas.getContext('2d');
+      offCtx.drawImage(img, 0, 0);
+
+      var imgObj = {
+        id: Date.now() + Math.random(),
+        cloudDocId: found.docId,
+        name: found.name,
+        fileSize: found.fileSize || 50000,
+        img: img,
+        width: img.width,
+        height: img.height,
+        originalCanvas: offCanvas,
+        src: found.thumbnailUrl,
+        autoSettings: computeAutoEnhanceSettings(offCtx, img.width, img.height),
+        customSettings: Object.assign({}, defaultSettings),
+        activeMode: found.enhancementMode || 'auto',
+        activePreset: found.presetId || 'Gốc',
+        createdAt: found.createdAt
+      };
+
+      images.push(imgObj);
+      currentImageIndex = images.length - 1;
+      setEnhancementMode(imgObj.activeMode, true);
+      enterStudioWorkspace();
+      showToast('Đã mở ảnh từ Cloud Firestore thành công!');
+    };
+    img.src = found.thumbnailUrl;
+  };
 
   // Initialize
   function init() {
     renderPresets();
     renderAdjustSliders();
     setupEventListeners();
+    initFirebase();
   }
 
-  // Render preset cards
+  // Render presets
   function renderPresets() {
-    var icons = {
-      original: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>',
-      vivid: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>',
-      soft: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>',
-      warm: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>',
-      cool: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>',
-      bw: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 0 20M12 2a10 10 0 0 0 0 20"/></svg>',
-      vintage: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2.39 4.84L20 8l-4 3.9.94 5.5L12 14.77 7.06 17.4 8 11.9 4 8l5.61-1.16L12 2z"/></svg>',
-      film: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="7" x2="7" y2="7"/><line x1="2" y1="17" x2="7" y2="17"/><line x1="17" y1="17" x2="22" y2="17"/><line x1="17" y1="7" x2="22" y2="7"/></svg>',
-      noir: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>',
-      sunset: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 18a5 5 0 0 0-10 0"/><line x1="12" y1="9" x2="12" y2="2"/><line x1="4.22" y1="10.22" x2="5.64" y2="11.64"/><line x1="1" y1="18" x2="3" y2="18"/><line x1="21" y1="18" x2="23" y2="18"/><line x1="18.36" y1="11.64" x2="19.78" y2="10.22"/><line x1="23" y1="22" x2="1" y2="22"/><polyline points="8 6 12 2 16 6"/></svg>',
-      ocean: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12c2.21 0 4-1.79 4-4s1.79-4 4-4 4 1.79 4 4 1.79 4 4 4 4-1.79 4-4"/><path d="M2 12h20M2 16c2.21 0 4-1.79 4-4s1.79-4 4-4 4 1.79 4 4 1.79 4 4 4 4-1.79 4-4"/><path d="M2 20c2.21 0 4-1.79 4-4s1.79-4 4-4 4 1.79 4 4 1.79 4 4 4 4-1.79 4-4"/></svg>',
-      dramatic: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>'
-    };
-
     presetGrid.innerHTML = presets.map(function(p, i) {
-      return '<div class="preset-card' + (i === 0 ? ' active' : '') + '" data-preset="' + p.name + '" style="padding:10px;text-align:center;">' +
-        '<div style="width:100%;height:50px;border-radius:6px;margin-bottom:6px;display:flex;align-items:center;justify-content:center;color:var(--accent);background:var(--bg);">' + (icons[p.icon] || icons.original) + '</div>' +
-        '<div class="text-xs font-medium" style="color:var(--text);">' + p.name + '</div>' +
-        '</div>';
+      return '<div class="preset-card' + (i === 0 ? ' active' : '') + ' p-2.5 text-center cursor-pointer" data-preset="' + p.name + '">' +
+        '<div class="w-full h-8 rounded-md mb-1.5 flex items-center justify-center text-sm bg-[#1e1e22] text-[var(--accent)] font-semibold">' +
+          (p.id === 'bw' || p.id === 'noir' ? 'BW' : p.id === 'warm' ? '☀️' : p.id === 'cool' || p.id === 'ocean' ? '❄️' : '🎨') +
+        '</div>' +
+        '<div class="text-[11px] font-medium text-[var(--text)] truncate">' + p.name + '</div>' +
+      '</div>';
     }).join('');
   }
 
-  // Render adjustment sliders
+  // Render Adjust Sliders
   function renderAdjustSliders() {
     var sliders = [
       { key: 'brightness', label: 'Độ sáng', min: 0, max: 200, unit: '%' },
-      { key: 'contrast', label: 'Tương phản', min: 0, max: 200, unit: '%' },
-      { key: 'saturation', label: 'Bão hòa', min: 0, max: 200, unit: '%' },
-      { key: 'vibrance', label: 'Sắc thái', min: 0, max: 200, unit: '%' },
-      { key: 'exposure', label: 'Phơi sáng', min: -100, max: 100, unit: '' },
-      { key: 'temperature', label: 'Nhiệt độ', min: -100, max: 100, unit: '' },
-      { key: 'tint', label: 'Tông màu', min: -100, max: 100, unit: '' },
-      { key: 'hue', label: 'Góc màu', min: 0, max: 360, unit: '°' },
-      { key: 'gamma', label: 'Gamma', min: 1, max: 300, unit: '' },
-      { key: 'sharpen', label: 'Sắc nét', min: 0, max: 100, unit: '' },
+      { key: 'contrast', label: 'Độ tương phản', min: 0, max: 200, unit: '%' },
+      { key: 'saturation', label: 'Độ bão hòa', min: 0, max: 200, unit: '%' },
+      { key: 'vibrance', label: 'Sắc thái màu (Vibrance)', min: 0, max: 200, unit: '%' },
+      { key: 'exposure', label: 'Độ phơi sáng', min: -100, max: 100, unit: '' },
+      { key: 'temperature', label: 'Nhiệt độ màu', min: -100, max: 100, unit: '' },
+      { key: 'tint', label: 'Sắc thái xanh/hồng', min: -100, max: 100, unit: '' },
+      { key: 'sharpen', label: 'Độ sắc nét', min: 0, max: 100, unit: '' },
       { key: 'blur', label: 'Làm mờ', min: 0, max: 20, unit: 'px' },
       { key: 'sepia', label: 'Nâu cổ', min: 0, max: 100, unit: '%' },
       { key: 'grayscale', label: 'Đen trắng', min: 0, max: 100, unit: '%' }
     ];
 
     adjustSliders.innerHTML = sliders.map(function(s) {
-      var val = currentSettings[s.key];
-      return '<div class="slider-group">' +
-        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">' +
-        '<label class="text-xs font-medium" style="color:var(--text);">' + s.label + '</label>' +
-        '<span class="text-xs" style="color:var(--accent);font-family:monospace;" data-value="' + s.key + '">' + val + s.unit + '</span>' +
+      var val = currentSettings[s.key] !== undefined ? currentSettings[s.key] : 0;
+      return '<div class="flex flex-col gap-1">' +
+        '<div class="flex items-center justify-between text-xs">' +
+          '<label class="text-[var(--text)] font-medium">' + s.label + '</label>' +
+          '<span class="font-mono text-[var(--accent)]" data-val-for="' + s.key + '">' + val + s.unit + '</span>' +
         '</div>' +
-        '<input type="range" class="slider-track w-full" data-key="' + s.key + '" min="' + s.min + '" max="' + s.max + '" value="' + val + '" style="width:100%;">' +
-        '</div>';
+        '<input type="range" class="slider-track w-full" data-slider-key="' + s.key + '" min="' + s.min + '" max="' + s.max + '" value="' + val + '">' +
+      '</div>';
     }).join('');
   }
 
-  // Setup event listeners
+  // Event Listeners Setup
   function setupEventListeners() {
-    // File upload
-    browseBtn.addEventListener('click', function() { fileInput.click(); });
-    fileInput.addEventListener('change', handleFiles);
-    
+    var triggerFile = function() { fileInput.click(); };
+    browseBtn.addEventListener('click', triggerFile);
+    headerUploadBtn.addEventListener('click', triggerFile);
+    addMoreBtn.addEventListener('click', triggerFile);
+    fileInput.addEventListener('change', handleFileInput);
+
+    // Dropzone
+    dropZone.addEventListener('click', triggerFile);
     dropZone.addEventListener('dragover', function(e) {
       e.preventDefault();
-      dropZone.classList.add('dragover');
+      dropZone.classList.add('border-[var(--accent)]');
     });
     dropZone.addEventListener('dragleave', function() {
-      dropZone.classList.remove('dragover');
+      dropZone.classList.remove('border-[var(--accent)]');
     });
     dropZone.addEventListener('drop', function(e) {
       e.preventDefault();
-      dropZone.classList.remove('dragover');
-      handleFiles({ target: { files: e.dataTransfer.files } });
+      dropZone.classList.remove('border-[var(--accent)]');
+      if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        processIncomingFiles(Array.from(e.dataTransfer.files));
+      }
     });
 
-    // Tabs
+    // Sample Demo Image
+    demoBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      loadDemoImage();
+    });
+
+    // Cloud History Actions
+    if (headerCloudBtn) {
+      headerCloudBtn.addEventListener('click', function() {
+        if (studioWorkspace.style.display !== 'none') {
+          // Switch to history tab
+          document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+          var histTabBtn = document.querySelector('[data-tab="history"]');
+          if (histTabBtn) histTabBtn.classList.add('active');
+          document.querySelectorAll('.tab-content').forEach(function(tc) { tc.classList.add('hidden'); });
+          var histTab = document.getElementById('historyTab');
+          if (histTab) histTab.classList.remove('hidden');
+          loadRecentCloudImages(true);
+        } else {
+          // In empty state, scroll to or reload cloud section
+          loadRecentCloudImages(true);
+          if (emptyCloudSection && emptyCloudSection.style.display !== 'none') {
+            emptyCloudSection.scrollIntoView({ behavior: 'smooth' });
+          } else {
+            showToast('Chưa có ảnh nào trên Cloud. Hãy tải ảnh lên để bắt đầu!');
+          }
+        }
+      });
+    }
+
+    if (refreshCloudBtn) {
+      refreshCloudBtn.addEventListener('click', function() {
+        loadRecentCloudImages(true);
+        showToast('Đang làm mới danh sách ảnh từ Firebase...');
+      });
+    }
+
+    // Tab Switching
     document.querySelectorAll('.tab-btn').forEach(function(btn) {
       btn.addEventListener('click', function() {
         document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
         btn.classList.add('active');
-        document.querySelectorAll('.tab-content').forEach(function(c) { c.style.display = 'none'; });
-        document.getElementById(btn.dataset.tab + 'Tab').style.display = 'block';
+        document.querySelectorAll('.tab-content').forEach(function(tc) { tc.classList.add('hidden'); });
+        var targetTab = document.getElementById(btn.dataset.tab + 'Tab');
+        if (targetTab) targetTab.classList.remove('hidden');
+        if (btn.dataset.tab === 'history') {
+          loadRecentCloudImages(true);
+        }
       });
     });
 
-    // Presets
+    // Enhance Mode Cards Click
+    document.querySelectorAll('.enhance-card').forEach(function(card) {
+      card.addEventListener('click', function() {
+        var mode = card.dataset.enhance;
+        setEnhancementMode(mode);
+      });
+    });
+
+    // Intensity Slider
+    enhanceIntensity.addEventListener('input', function(e) {
+      enhancementIntensity = parseInt(e.target.value) / 100;
+      enhanceIntensityVal.textContent = e.target.value + '%';
+      applyCurrentEnhancementToActiveImage();
+    });
+
+    // Presets Click
     presetGrid.addEventListener('click', function(e) {
       var card = e.target.closest('.preset-card');
       if (!card) return;
       document.querySelectorAll('.preset-card').forEach(function(c) { c.classList.remove('active'); });
       card.classList.add('active');
-      var presetName = card.dataset.preset;
-      var preset = presets.find(function(p) { return p.name === presetName; });
-      if (preset) {
-        applyPreset(preset);
+      var pName = card.dataset.preset;
+      var found = presets.find(function(p) { return p.name === pName; });
+      if (found) {
+        applyPresetFilters(found);
       }
     });
 
-    // Sliders
+    // Manual Adjust Sliders Input
     adjustSliders.addEventListener('input', function(e) {
-      if (e.target.classList.contains('slider-track')) {
-        var key = e.target.dataset.key;
+      if (e.target.dataset.sliderKey) {
+        var key = e.target.dataset.sliderKey;
         var val = parseInt(e.target.value);
         currentSettings[key] = val;
-        var valDisplay = document.querySelector('[data-value="' + key + '"]');
-        if (valDisplay) {
-          var unit = '';
-          if (key === 'brightness' || key === 'contrast' || key === 'saturation' || key === 'vibrance' || key === 'sepia' || key === 'grayscale') unit = '%';
-          else if (key === 'hue') unit = '°';
-          else if (key === 'blur') unit = 'px';
-          valDisplay.textContent = val + unit;
+        var span = document.querySelector('[data-val-for="' + key + '"]');
+        if (span) {
+          var unit = (key === 'brightness' || key === 'contrast' || key === 'saturation' || key === 'vibrance' || key === 'sepia' || key === 'grayscale') ? '%' : (key === 'blur' ? 'px' : '');
+          span.textContent = val + unit;
         }
-        updatePreviews();
+        applyCurrentEnhancementToActiveImage();
       }
     });
 
-    // Enhance buttons
-    document.querySelectorAll('.enhance-btn').forEach(function(btn) {
-      btn.addEventListener('click', function() {
-        var type = btn.dataset.enhance;
-        applyEnhancement(type);
-      });
+    // Reset Manual Adjustments
+    resetAdjustBtn.addEventListener('click', function() {
+      currentSettings = Object.assign({}, defaultSettings);
+      renderAdjustSliders();
+      applyCurrentEnhancementToActiveImage();
+      showToast('Đã đặt lại tinh chỉnh thủ công');
     });
 
-    // Toolbar buttons
-    document.getElementById('selectAllBtn').addEventListener('click', selectAll);
-    document.getElementById('applyAllBtn').addEventListener('click', applyToSelected);
-    document.getElementById('resetAllBtn').addEventListener('click', resetAll);
-    document.getElementById('removeSelectedBtn').addEventListener('click', removeSelected);
-    document.getElementById('downloadSelectedBtn').addEventListener('click', downloadSelected);
-    document.getElementById('downloadAllBtn').addEventListener('click', downloadAll);
-
-    // Compare mode
-    document.getElementById('compareMode').addEventListener('change', function(e) {
-      document.querySelectorAll('.image-card').forEach(function(card) {
-        var compareOverlay = card.querySelector('.compare-overlay');
-        if (compareOverlay) {
-          compareOverlay.style.display = e.target.checked ? 'block' : 'none';
-        }
-      });
+    // Footer Reset
+    footerResetBtn.addEventListener('click', function() {
+      setEnhancementMode('original');
+      showToast('Đã đưa về ảnh gốc');
     });
+
+    // Downloads
+    headerDownloadBtn.addEventListener('click', downloadActiveImage);
+    footerDownloadBtn.addEventListener('click', downloadActiveImage);
+    footerDownloadAllBtn.addEventListener('click', downloadAllImages);
+
+    // Hold To View Original (Mouse + Touch Support for Mobile)
+    function startOriginalCompare(e) {
+      if (e) e.preventDefault();
+      if (images.length === 0) return;
+      isComparing = true;
+      holdCompareText.textContent = 'Đang xem ảnh gốc';
+      holdCompareBtn.classList.add('bg-[var(--accent)]', 'text-[#1a1a1e]');
+      drawDirectToCanvas(images[currentImageIndex].originalCanvas);
+    }
+
+    function endOriginalCompare(e) {
+      if (e) e.preventDefault();
+      if (!isComparing) return;
+      isComparing = false;
+      holdCompareText.textContent = 'Giữ xem ảnh gốc';
+      holdCompareBtn.classList.remove('bg-[var(--accent)]', 'text-[#1a1a1e]');
+      renderActiveImage();
+    }
+
+    holdCompareBtn.addEventListener('mousedown', startOriginalCompare);
+    window.addEventListener('mouseup', endOriginalCompare);
+    holdCompareBtn.addEventListener('touchstart', startOriginalCompare, { passive: false });
+    window.addEventListener('touchend', endOriginalCompare);
+    window.addEventListener('touchcancel', endOriginalCompare);
+
+    // Split Compare Mode Toggle
+    splitCompareBtn.addEventListener('click', function() {
+      isSplitComparing = !isSplitComparing;
+      splitOverlay.style.display = isSplitComparing ? 'flex' : 'none';
+      splitCompareBtn.classList.toggle('bg-[var(--accent)]', isSplitComparing);
+      splitCompareBtn.classList.toggle('text-[#1a1a1e]', isSplitComparing);
+      if (isSplitComparing) {
+        updateSplitComparePosition(50);
+      }
+    });
+
+    // Split Slider Dragging (Mouse & Touch)
+    var isDraggingSlider = false;
+    function onSliderStart(e) {
+      isDraggingSlider = true;
+      e.preventDefault();
+    }
+    function onSliderMove(e) {
+      if (!isDraggingSlider) return;
+      var clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      var rect = splitOverlay.getBoundingClientRect();
+      var pct = ((clientX - rect.left) / rect.width) * 100;
+      pct = Math.max(0, Math.min(100, pct));
+      updateSplitComparePosition(pct);
+    }
+    function onSliderEnd() {
+      isDraggingSlider = false;
+    }
+
+    splitSliderBar.addEventListener('mousedown', onSliderStart);
+    splitSliderBar.addEventListener('touchstart', onSliderStart, { passive: false });
+    window.addEventListener('mousemove', onSliderMove);
+    window.addEventListener('touchmove', onSliderMove, { passive: false });
+    window.addEventListener('mouseup', onSliderEnd);
+    window.addEventListener('touchend', onSliderEnd);
   }
 
-  // Handle uploaded files
-  function handleFiles(e) {
-    var files = Array.from(e.target.files);
-    files.forEach(function(file) {
-      if (!file.type.startsWith('image/')) return;
-      var reader = new FileReader();
-      reader.onload = function(event) {
-        var img = new Image();
-        img.onload = function() {
-          var id = Date.now() + Math.random();
-          images.push({
-            id: id,
-            name: file.name,
-            originalSrc: event.target.result,
-            img: img,
-            width: img.width,
-            height: img.height,
-            settings: JSON.parse(JSON.stringify(currentSettings))
-          });
-          renderImages();
-        };
-        img.src = event.target.result;
-      };
-      reader.readAsDataURL(file);
-    });
-    mainContent.style.display = 'block';
+  // Update Split Compare Position
+  function updateSplitComparePosition(pct) {
+    splitSliderBar.style.left = pct + '%';
+    originalImgEl.style.clipPath = 'inset(0 ' + (100 - pct) + '% 0 0)';
   }
 
-  // Render image cards
-  function renderImages() {
-    imageGrid.innerHTML = images.map(function(imgData) {
-      var isSelected = selectedImages.has(imgData.id);
-      return '<div class="image-card rounded-xl overflow-hidden" data-id="' + imgData.id + '" style="background:var(--card);border:1px solid ' + (isSelected ? 'var(--accent)' : 'var(--border)') + ';' + (isSelected ? 'box-shadow:0 0 0 2px var(--accent),0 0 20px var(--accent-soft);' : '') + '">' +
-        '<div style="position:relative;aspect-ratio:4/3;background:var(--bg);overflow:hidden;cursor:pointer;" class="image-preview">' +
-        '<canvas class="processed-canvas" style="width:100%;height:100%;object-fit:contain;display:block;"></canvas>' +
-        '<div class="compare-overlay" style="display:none;position:absolute;top:0;left:0;width:100%;height:100%;overflow:hidden;pointer-events:none;">' +
-        '<img class="original-img" src="' + imgData.originalSrc + '" style="width:100%;height:100%;object-fit:contain;position:absolute;top:0;left:0;clip-path:inset(0 50% 0 0);">' +
-        '<div class="compare-slider" style="left:50%;"></div>' +
-        '</div>' +
-        '<div style="position:absolute;top:8px;left:8px;display:flex;gap:6px;align-items:center;">' +
-        '<label style="display:flex;align-items:center;gap:4px;cursor:pointer;padding:4px 8px;border-radius:6px;background:rgba(32,32,36,0.8);backdrop-filter:blur(4px);">' +
-        '<input type="checkbox" class="image-select" data-id="' + imgData.id + '" ' + (isSelected ? 'checked' : '') + ' style="width:14px;height:14px;accent-color:var(--accent);">' +
-        '</label>' +
-        '</div>' +
-        '<div style="position:absolute;top:8px;right:8px;padding:4px 8px;border-radius:6px;background:rgba(32,32,36,0.8);backdrop-filter:blur(4px);">' +
-        '<span class="text-xs" style="color:var(--text);font-family:monospace;">' + imgData.width + '×' + imgData.height + '</span>' +
-        '</div>' +
-        '</div>' +
-        '<div style="padding:12px;">' +
-        '<div class="text-sm font-medium truncate" style="color:var(--text);" title="' + imgData.name + '">' + imgData.name + '</div>' +
-        '<div class="text-xs mt-1" style="color:var(--muted);">' + formatFileSize(imgData.img.src.length) + '</div>' +
-        '</div>' +
-        '</div>';
-    }).join('');
-
-    // Process each image
-    images.forEach(function(imgData) {
-      processImage(imgData);
-    });
-
-    // Setup card interactions
-    setupCardInteractions();
-  }
-
-  // Setup card interactions
-  function setupCardInteractions() {
-    document.querySelectorAll('.image-select').forEach(function(cb) {
-      cb.addEventListener('change', function(e) {
-        e.stopPropagation();
-        var id = parseFloat(cb.dataset.id);
-        if (cb.checked) {
-          selectedImages.add(id);
-        } else {
-          selectedImages.delete(id);
-        }
-        var card = cb.closest('.image-card');
-        if (card) {
-          if (cb.checked) {
-            card.style.borderColor = 'var(--accent)';
-            card.style.boxShadow = '0 0 0 2px var(--accent),0 0 20px var(--accent-soft)';
-          } else {
-            card.style.borderColor = 'var(--border)';
-            card.style.boxShadow = 'none';
-          }
-        }
-      });
-    });
-
-    // Compare slider
-    document.querySelectorAll('.compare-slider').forEach(function(slider) {
-      slider.style.pointerEvents = 'auto';
-      var isDragging = false;
-      var overlay = slider.parentElement;
-      var originalImg = overlay.querySelector('.original-img');
-      
-      slider.addEventListener('mousedown', function(e) {
-        isDragging = true;
-        e.preventDefault();
-      });
-      
-      document.addEventListener('mousemove', function(e) {
-        if (!isDragging) return;
-        var rect = overlay.getBoundingClientRect();
-        var percent = ((e.clientX - rect.left) / rect.width) * 100;
-        percent = Math.max(0, Math.min(100, percent));
-        originalImg.style.clipPath = 'inset(0 ' + (100 - percent) + '% 0 0)';
-        slider.style.left = percent + '%';
-      });
-      
-      document.addEventListener('mouseup', function() {
-        isDragging = false;
-      });
-    });
-  }
-
-  // Process image with canvas
-  function processImage(imgData) {
-    var card = document.querySelector('.image-card[data-id="' + imgData.id + '"]');
-    if (!card) return;
-    var canvas = card.querySelector('.processed-canvas');
-    if (!canvas) return;
-    
-    var ctx = canvas.getContext('2d');
-    var maxDim = 800;
-    var scale = Math.min(1, maxDim / Math.max(imgData.width, imgData.height));
-    canvas.width = imgData.width * scale;
-    canvas.height = imgData.height * scale;
-    
-    var s = imgData.settings;
-    
-    // Build CSS filter string
-    var filters = [];
-    filters.push('brightness(' + s.brightness + '%)');
-    filters.push('contrast(' + s.contrast + '%)');
-    filters.push('saturate(' + s.saturation + '%)');
-    filters.push('hue-rotate(' + s.hue + 'deg)');
-    filters.push('sepia(' + s.sepia + '%)');
-    filters.push('grayscale(' + s.grayscale + '%)');
-    if (s.blur > 0) filters.push('blur(' + s.blur + 'px)');
-    
-    ctx.filter = filters.join(' ');
-    ctx.drawImage(imgData.img, 0, 0, canvas.width, canvas.height);
-    ctx.filter = 'none';
-    
-    // Apply additional pixel-level adjustments
-    if (s.temperature !== 0 || s.tint !== 0 || s.vibrance !== 100 || s.gamma !== 100 || s.exposure !== 0 || s.sharpen > 0) {
-      applyPixelAdjustments(ctx, canvas, s);
+  // Handle Input Files
+  function handleFileInput(e) {
+    if (e.target.files && e.target.files.length > 0) {
+      processIncomingFiles(Array.from(e.target.files));
+      e.target.value = '';
     }
   }
 
-  // Advanced pixel-level adjustments
-  function applyPixelAdjustments(ctx, canvas, s) {
-    var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    var data = imageData.data;
-    var gamma = s.gamma / 100;
-    var invGamma = 1 / gamma;
-    var exposure = Math.pow(2, s.exposure / 100);
-    var tempAdjust = s.temperature / 100;
-    var tintAdjust = s.tint / 100;
-    var vibrance = s.vibrance / 100;
-    
+  // Process Incoming Files
+  function processIncomingFiles(fileList) {
+    var validFiles = fileList.filter(function(f) { return f.type.startsWith('image/'); });
+    if (validFiles.length === 0) {
+      showToast('Vui lòng chọn tệp hình ảnh hợp lệ (JPG, PNG, WebP)');
+      return;
+    }
+
+    var loadedCount = 0;
+    var initialStartIndex = images.length;
+
+    validFiles.forEach(function(file) {
+      var reader = new FileReader();
+      reader.onload = function(evt) {
+        var img = new Image();
+        img.onload = function() {
+          // Create cached offscreen canvas for original
+          var offCanvas = document.createElement('canvas');
+          offCanvas.width = img.width;
+          offCanvas.height = img.height;
+          var offCtx = offCanvas.getContext('2d');
+          offCtx.drawImage(img, 0, 0);
+
+          var imgObj = {
+            id: Date.now() + Math.random(),
+            name: file.name,
+            fileSize: file.size,
+            img: img,
+            width: img.width,
+            height: img.height,
+            originalCanvas: offCanvas,
+            src: evt.target.result,
+            // Automatically analyze and calculate auto-enhance metrics
+            autoSettings: computeAutoEnhanceSettings(offCtx, img.width, img.height),
+            customSettings: Object.assign({}, defaultSettings),
+            activeMode: 'auto', // DEFAULT TO AUTO ENHANCE!
+            activePreset: 'Gốc'
+          };
+
+          images.push(imgObj);
+          loadedCount++;
+
+          // Save to Firestore (keeping recent 20 images)
+          saveImageToCloud(imgObj);
+
+          if (loadedCount === validFiles.length) {
+            // All loaded
+            currentImageIndex = initialStartIndex;
+            setEnhancementMode('auto', true); // APPLY AUTO ENHANCE BY DEFAULT
+            enterStudioWorkspace();
+            showToast('✨ Đã tải và tự động tối ưu ' + validFiles.length + ' ảnh!');
+          }
+        };
+        img.src = evt.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // Generate a rich synthetic landscape photo on the fly for Demo testing
+  function loadDemoImage() {
+    var canvas = document.createElement('canvas');
+    canvas.width = 1200;
+    canvas.height = 800;
+    var ctx = canvas.getContext('2d');
+
+    // Sky gradient
+    var sky = ctx.createLinearGradient(0, 0, 0, 500);
+    sky.addColorStop(0, '#1e3c72');
+    sky.addColorStop(0.5, '#2a5298');
+    sky.addColorStop(0.8, '#f7b733');
+    sky.addColorStop(1, '#fc4a1a');
+    ctx.fillStyle = sky;
+    ctx.fillRect(0, 0, 1200, 500);
+
+    // Sun
+    ctx.beginPath();
+    ctx.arc(600, 360, 60, 0, Math.PI * 2);
+    ctx.fillStyle = '#fff4cc';
+    ctx.shadowColor = '#fc4a1a';
+    ctx.shadowBlur = 40;
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    // Distant mountains
+    ctx.fillStyle = '#1c1b30';
+    ctx.beginPath();
+    ctx.moveTo(0, 480);
+    ctx.lineTo(250, 310);
+    ctx.lineTo(450, 420);
+    ctx.lineTo(750, 270);
+    ctx.lineTo(1000, 430);
+    ctx.lineTo(1200, 340);
+    ctx.lineTo(1200, 500);
+    ctx.lineTo(0, 500);
+    ctx.fill();
+
+    // Water & reflection
+    var water = ctx.createLinearGradient(0, 500, 0, 800);
+    water.addColorStop(0, '#fc4a1a');
+    water.addColorStop(0.2, '#b83b5e');
+    water.addColorStop(0.6, '#382039');
+    water.addColorStop(1, '#111322');
+    ctx.fillStyle = water;
+    ctx.fillRect(0, 500, 1200, 300);
+
+    // Water ripples
+    ctx.strokeStyle = 'rgba(255, 220, 150, 0.4)';
+    ctx.lineWidth = 2;
+    for (var i = 520; i < 780; i += 18) {
+      ctx.beginPath();
+      var w = 180 + (i - 500) * 1.5;
+      ctx.moveTo(600 - w, i);
+      ctx.lineTo(600 + w, i);
+      ctx.stroke();
+    }
+
+    // Foreground silhouettes
+    ctx.fillStyle = '#0a0a10';
+    ctx.beginPath();
+    ctx.moveTo(0, 800);
+    ctx.lineTo(180, 650);
+    ctx.lineTo(350, 800);
+    ctx.fill();
+
+    var dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+    var img = new Image();
+    img.onload = function() {
+      var offCanvas = document.createElement('canvas');
+      offCanvas.width = img.width;
+      offCanvas.height = img.height;
+      offCanvas.getContext('2d').drawImage(img, 0, 0);
+
+      var imgObj = {
+        id: Date.now(),
+        name: 'mau_hoang_hon_4k.jpg',
+        fileSize: 450000,
+        img: img,
+        width: img.width,
+        height: img.height,
+        originalCanvas: offCanvas,
+        src: dataUrl,
+        autoSettings: computeAutoEnhanceSettings(offCanvas.getContext('2d'), img.width, img.height),
+        customSettings: Object.assign({}, defaultSettings),
+        activeMode: 'auto',
+        activePreset: 'Gốc'
+      };
+
+      images.push(imgObj);
+      saveImageToCloud(imgObj);
+      currentImageIndex = images.length - 1;
+      setEnhancementMode('auto', true);
+      enterStudioWorkspace();
+      showToast('✨ Đã nạp ảnh mẫu và tự động tối ưu!');
+    };
+    img.src = dataUrl;
+  }
+
+  // Switch to Studio UI
+  function enterStudioWorkspace() {
+    emptyState.style.display = 'none';
+    studioWorkspace.style.display = 'flex';
+    headerActionsLoaded.style.display = 'flex';
+    renderFilmstrip();
+    renderActiveImage();
+  }
+
+  // Render Thumbnails Filmstrip
+  function renderFilmstrip() {
+    allCount.textContent = images.length;
+    footerDownloadAllBtn.style.display = images.length > 1 ? 'inline-flex' : 'none';
+    filmstripContainer.style.display = images.length > 1 ? 'flex' : 'none';
+
+    filmstrip.innerHTML = images.map(function(imgData, idx) {
+      var isAct = idx === currentImageIndex;
+      return '<div class="thumb-item' + (isAct ? ' active' : '') + ' relative w-8 h-8 rounded-md overflow-hidden cursor-pointer shrink-0 bg-[#2a2a30]" data-idx="' + idx + '">' +
+        '<img src="' + imgData.src + '" class="w-full h-full object-cover pointer-events-none">' +
+        (isAct ? '<div class="absolute inset-0 bg-[var(--accent-soft)]"></div>' : '') +
+      '</div>';
+    }).join('');
+
+    filmstrip.querySelectorAll('.thumb-item').forEach(function(el) {
+      el.addEventListener('click', function() {
+        var idx = parseInt(el.dataset.idx);
+        switchActiveImage(idx);
+      });
+    });
+  }
+
+  // Switch Active Image
+  function switchActiveImage(idx) {
+    if (idx < 0 || idx >= images.length) return;
+    currentImageIndex = idx;
+    var cur = images[currentImageIndex];
+    activeEnhancement = cur.activeMode || 'auto';
+    syncEnhanceCardUI();
+    renderFilmstrip();
+    renderActiveImage();
+  }
+
+  // Set Enhancement Mode ('auto', 'hd', 'denoise', 'sharpen', 'hdr', 'original')
+  function setEnhancementMode(mode, skipRender) {
+    activeEnhancement = mode;
+    syncEnhanceCardUI();
+
+    var targetList = applyAllCheckbox.checked ? images : [images[currentImageIndex]];
+    targetList.forEach(function(imgData) {
+      if (imgData) {
+        imgData.activeMode = mode;
+      }
+    });
+
+    if (!skipRender) {
+      applyCurrentEnhancementToActiveImage();
+    }
+  }
+
+  // Sync Enhance Card UI Highlighting
+  function syncEnhanceCardUI() {
+    document.querySelectorAll('.enhance-card').forEach(function(card) {
+      var isAct = card.dataset.enhance === activeEnhancement;
+      card.classList.toggle('active', isAct);
+      var ind = card.querySelector('.active-indicator');
+      if (ind) {
+        ind.classList.toggle('hidden', !isAct);
+      }
+    });
+
+    var badgeText = '✨ Tự động tối ưu';
+    if (activeEnhancement === 'hd') badgeText = '💎 Nâng cấp HD';
+    else if (activeEnhancement === 'denoise') badgeText = '🛡️ Giảm nhiễu';
+    else if (activeEnhancement === 'sharpen') badgeText = '⚡ Tăng sắc nét';
+    else if (activeEnhancement === 'hdr') badgeText = '🌅 Hiệu ứng HDR';
+    else if (activeEnhancement === 'original') badgeText = '🔄 Ảnh gốc';
+
+    activeBadge.textContent = badgeText;
+  }
+
+  // Apply Preset Filters
+  function applyPresetFilters(preset) {
+    var cur = images[currentImageIndex];
+    if (!cur) return;
+    cur.activePreset = preset.name;
+    currentSettings = Object.assign({}, defaultSettings);
+    Object.keys(preset.filters).forEach(function(k) {
+      currentSettings[k] = preset.filters[k];
+    });
+    renderAdjustSliders();
+    applyCurrentEnhancementToActiveImage();
+    showToast('Đã áp dụng bộ lọc: ' + preset.name);
+  }
+
+  // Core Auto-Enhance Analyzer
+  // Fast pixel sampling to calculate optimal dynamic range, luma & color balance
+  function computeAutoEnhanceSettings(ctx, width, height) {
+    var sampleSize = 100;
+    var tempCanvas = document.createElement('canvas');
+    tempCanvas.width = sampleSize;
+    tempCanvas.height = sampleSize;
+    var tempCtx = tempCanvas.getContext('2d');
+    tempCtx.drawImage(ctx.canvas, 0, 0, sampleSize, sampleSize);
+
+    var imgData = tempCtx.getImageData(0, 0, sampleSize, sampleSize);
+    var data = imgData.data;
+    var numPixels = sampleSize * sampleSize;
+
+    var totalR = 0, totalG = 0, totalB = 0, totalLuma = 0;
+    var lumaList = [];
+
     for (var i = 0; i < data.length; i += 4) {
       var r = data[i];
       var g = data[i + 1];
       var b = data[i + 2];
-      
-      // Exposure
-      r *= exposure;
-      g *= exposure;
-      b *= exposure;
-      
-      // Temperature (warm/cool)
-      if (tempAdjust > 0) {
-        r += tempAdjust * 25;
-        b -= tempAdjust * 15;
-      } else {
-        r += tempAdjust * 20;
-        b -= tempAdjust * 25;
-      }
-      
-      // Tint (green/magenta)
-      if (tintAdjust > 0) {
-        g += tintAdjust * 15;
-        r -= tintAdjust * 10;
-      } else {
-        g += tintAdjust * 10;
-        r -= tintAdjust * 15;
-      }
-      
-      // Gamma
-      r = 255 * Math.pow(r / 255, invGamma);
-      g = 255 * Math.pow(g / 255, invGamma);
-      b = 255 * Math.pow(b / 255, invGamma);
-      
-      // Vibrance (intelligent saturation)
-      if (vibrance !== 1) {
-        var max = Math.max(r, g, b);
-        var avg = (r + g + b) / 3;
-        var amt = (vibrance - 1) * (1 - Math.abs(max - avg) / 128);
-        r += (r - avg) * amt;
-        g += (g - avg) * amt;
-        b += (b - avg) * amt;
-      }
-      
-      // Clamp
-      data[i] = Math.max(0, Math.min(255, r));
-      data[i + 1] = Math.max(0, Math.min(255, g));
-      data[i + 2] = Math.max(0, Math.min(255, b));
+      var luma = 0.299 * r + 0.587 * g + 0.114 * b;
+      totalR += r;
+      totalG += g;
+      totalB += b;
+      totalLuma += luma;
+      lumaList.push(luma);
     }
-    
-    // Sharpen convolution
-    if (s.sharpen > 0) {
-      var sharpened = applySharpen(imageData, canvas.width, canvas.height, s.sharpen / 100);
-      ctx.putImageData(sharpened, 0, 0);
+
+    var avgR = totalR / numPixels;
+    var avgG = totalG / numPixels;
+    var avgB = totalB / numPixels;
+    var avgLuma = totalLuma / numPixels;
+
+    // Sort to get 5th and 95th percentile
+    lumaList.sort(function(a, b) { return a - b; });
+    var p5 = lumaList[Math.floor(numPixels * 0.05)];
+    var p95 = lumaList[Math.floor(numPixels * 0.95)];
+    var spread = p95 - p5;
+
+    // Exposure / Brightness calculation
+    var brightness = 100;
+    var exposure = 0;
+    if (avgLuma < 100) {
+      brightness = Math.round(108 + (100 - avgLuma) * 0.25);
+      exposure = Math.round((100 - avgLuma) * 0.2);
+    } else if (avgLuma > 175) {
+      brightness = Math.round(94 - (avgLuma - 175) * 0.18);
+      exposure = Math.round(-(avgLuma - 175) * 0.15);
     } else {
-      ctx.putImageData(imageData, 0, 0);
+      brightness = 103;
+      exposure = 4;
+    }
+
+    // Contrast calculation
+    var contrast = 110;
+    if (spread < 80) contrast = 122; // Low dynamic range -> boost contrast
+    else if (spread > 180) contrast = 105; // Already high contrast -> gentle
+
+    // Color temperature and tint correction
+    var temp = 0;
+    var tint = 0;
+    if (avgR > avgB + 14) {
+      temp = -8; // Warm cast -> cool it slightly
+    } else if (avgB > avgR + 14) {
+      temp = 8; // Cool cast -> warm it slightly
+    }
+
+    // Vibrance
+    var vibrance = 120;
+    var saturation = 108;
+
+    // Sharpen
+    var sharpen = 25;
+
+    return {
+      brightness: brightness,
+      contrast: contrast,
+      exposure: exposure,
+      temperature: temp,
+      tint: tint,
+      vibrance: vibrance,
+      saturation: saturation,
+      sharpen: sharpen,
+      gamma: 96
+    };
+  }
+
+  // Trigger processing and display for current image
+  function applyCurrentEnhancementToActiveImage() {
+    renderActiveImage();
+  }
+
+  // Render processed image onto Main Canvas
+  function renderActiveImage() {
+    if (images.length === 0) return;
+    var cur = images[currentImageIndex];
+    if (!cur) return;
+
+    dimBadge.textContent = cur.width + '×' + cur.height;
+    originalImgEl.src = cur.src;
+
+    // Size canvas properly for preview display (smooth 60fps)
+    var maxDim = 1400;
+    var scale = Math.min(1, maxDim / Math.max(cur.width, cur.height));
+    var w = Math.round(cur.width * scale);
+    var h = Math.round(cur.height * scale);
+
+    mainCanvas.width = w;
+    mainCanvas.height = h;
+    var ctx = mainCanvas.getContext('2d');
+
+    // Draw base image
+    ctx.drawImage(cur.img, 0, 0, w, h);
+
+    // Apply the active enhancement & adjustments
+    processCanvasPixels(ctx, w, h, cur, enhancementIntensity);
+  }
+
+  // Draw an offscreen canvas directly (used for instant Compare preview)
+  function drawDirectToCanvas(srcCanvas) {
+    if (!srcCanvas) return;
+    var maxDim = 1400;
+    var scale = Math.min(1, maxDim / Math.max(srcCanvas.width, srcCanvas.height));
+    var w = Math.round(srcCanvas.width * scale);
+    var h = Math.round(srcCanvas.height * scale);
+    mainCanvas.width = w;
+    mainCanvas.height = h;
+    mainCanvas.getContext('2d').drawImage(srcCanvas, 0, 0, w, h);
+  }
+
+  // Master Pixel Processing Function
+  // Handles: Auto Enhance, HD, Denoise, Sharpen, HDR, Presets & Sliders
+  function processCanvasPixels(ctx, w, h, imgData, intensity) {
+    var mode = imgData.activeMode || 'auto';
+    var imgDataObj = ctx.getImageData(0, 0, w, h);
+    var pixels = imgDataObj.data;
+
+    // 1. Determine enhancement coefficients based on mode
+    var auto = imgData.autoSettings || {};
+    var pBrightness = currentSettings.brightness;
+    var pContrast = currentSettings.contrast;
+    var pSaturation = currentSettings.saturation;
+    var pVibrance = currentSettings.vibrance;
+    var pExposure = currentSettings.exposure;
+    var pTemp = currentSettings.temperature;
+    var pTint = currentSettings.tint;
+    var pSharpen = currentSettings.sharpen;
+    var pDenoise = 0;
+    var isHdr = false;
+    var isHd = false;
+
+    if (mode === 'auto') {
+      // Auto AI Blend
+      pBrightness = lerp(100, auto.brightness, intensity);
+      pContrast = lerp(100, auto.contrast, intensity);
+      pExposure = lerp(0, auto.exposure, intensity);
+      pTemp = lerp(0, auto.temperature, intensity);
+      pTint = lerp(0, auto.tint, intensity);
+      pVibrance = lerp(100, auto.vibrance, intensity);
+      pSaturation = lerp(100, auto.saturation, intensity);
+      pSharpen = lerp(0, auto.sharpen, intensity);
+    } else if (mode === 'hd') {
+      // HD Clarity: micro-contrast, crisp edges, punchy vibrance
+      isHd = true;
+      pContrast = lerp(100, 118, intensity);
+      pSharpen = lerp(0, 50, intensity);
+      pVibrance = lerp(100, 122, intensity);
+      pBrightness = lerp(100, 104, intensity);
+    } else if (mode === 'denoise') {
+      // Denoise: Edge-preserving smoothing
+      pDenoise = Math.round(lerp(0, 2, intensity));
+      pVibrance = lerp(100, 108, intensity);
+      pBrightness = lerp(100, 102, intensity);
+    } else if (mode === 'sharpen') {
+      // Crisp Unsharp Mask
+      pSharpen = lerp(0, 65, intensity);
+      pContrast = lerp(100, 108, intensity);
+    } else if (mode === 'hdr') {
+      // HDR: Lift shadows, tame highlights, rich tone mapping
+      isHdr = true;
+      pContrast = lerp(100, 120, intensity);
+      pVibrance = lerp(100, 130, intensity);
+      pSaturation = lerp(100, 110, intensity);
+    } else if (mode === 'original') {
+      // No enhancements, pure original
+      pBrightness = 100;
+      pContrast = 100;
+      pSaturation = 100;
+      pVibrance = 100;
+      pExposure = 0;
+      pTemp = 0;
+      pTint = 0;
+      pSharpen = 0;
+      pDenoise = 0;
+    }
+
+    // 2. Perform Edge-Preserving Denoise Filter if requested
+    if (pDenoise > 0) {
+      applyEdgePreservingDenoise(pixels, w, h, 28);
+    }
+
+    // 3. Pixel Color, Tone Curve & Tone Mapping Loop
+    var expFactor = Math.pow(2, pExposure / 100);
+    var contFactor = (259 * (pContrast + 255)) / (255 * (259 - pContrast));
+    var brightOffset = (pBrightness - 100) * 1.25;
+    var tempVal = pTemp * 0.4;
+    var tintVal = pTint * 0.4;
+    var vibranceFactor = (pVibrance - 100) / 100;
+    var satFactor = pSaturation / 100;
+    var sepiaVal = currentSettings.sepia / 100;
+    var grayVal = currentSettings.grayscale / 100;
+
+    for (var i = 0; i < pixels.length; i += 4) {
+      var r = pixels[i];
+      var g = pixels[i + 1];
+      var b = pixels[i + 2];
+
+      // Exposure
+      if (pExposure !== 0) {
+        r *= expFactor;
+        g *= expFactor;
+        b *= expFactor;
+      }
+
+      // Brightness
+      if (brightOffset !== 0) {
+        r += brightOffset;
+        g += brightOffset;
+        b += brightOffset;
+      }
+
+      // Contrast
+      if (pContrast !== 100) {
+        r = contFactor * (r - 128) + 128;
+        g = contFactor * (g - 128) + 128;
+        b = contFactor * (b - 128) + 128;
+      }
+
+      // HDR Tone Mapping (Lifting shadows, preserving highlights)
+      if (isHdr) {
+        var lum = 0.299 * r + 0.587 * g + 0.114 * b;
+        // Shadow lift curve
+        if (lum < 140) {
+          var shadowLift = (140 - lum) * 0.28 * intensity;
+          r += shadowLift;
+          g += shadowLift;
+          b += shadowLift;
+        }
+        // Highlight recovery
+        if (lum > 200) {
+          var highlightTame = (lum - 200) * 0.2 * intensity;
+          r -= highlightTame;
+          g -= highlightTame;
+          b -= highlightTame;
+        }
+      }
+
+      // Color Temperature (Warm/Cool) & Tint (Magenta/Green)
+      if (tempVal !== 0) {
+        r += tempVal * 1.4;
+        b -= tempVal * 1.4;
+      }
+      if (tintVal !== 0) {
+        g -= tintVal * 1.2;
+        r += tintVal * 0.6;
+        b += tintVal * 0.6;
+      }
+
+      // Vibrance (Intelligently saturate less-saturated pixels without blowing out skin tones)
+      if (vibranceFactor !== 0) {
+        var maxC = Math.max(r, Math.max(g, b));
+        var minC = Math.min(r, Math.min(g, b));
+        var delta = (maxC - minC) / 255;
+        var amt = vibranceFactor * (1.0 - delta);
+        var mean = (r + g + b) / 3;
+        r += (r - mean) * amt;
+        g += (g - mean) * amt;
+        b += (b - mean) * amt;
+      }
+
+      // Saturation
+      if (satFactor !== 1) {
+        var gray = 0.299 * r + 0.587 * g + 0.114 * b;
+        r = gray + satFactor * (r - gray);
+        g = gray + satFactor * (g - gray);
+        b = gray + satFactor * (b - gray);
+      }
+
+      // Sepia Filter
+      if (sepiaVal > 0) {
+        var sr = (r * 0.393) + (g * 0.769) + (b * 0.189);
+        var sg = (r * 0.349) + (g * 0.686) + (b * 0.168);
+        var sb = (r * 0.272) + (g * 0.534) + (b * 0.131);
+        r = r * (1 - sepiaVal) + sr * sepiaVal;
+        g = g * (1 - sepiaVal) + sg * sepiaVal;
+        b = b * (1 - sepiaVal) + sb * sepiaVal;
+      }
+
+      // Grayscale Filter
+      if (grayVal > 0) {
+        var l = 0.299 * r + 0.587 * g + 0.114 * b;
+        r = r * (1 - grayVal) + l * grayVal;
+        g = g * (1 - grayVal) + l * grayVal;
+        b = b * (1 - grayVal) + l * grayVal;
+      }
+
+      // Clamp values 0-255
+      pixels[i] = r < 0 ? 0 : (r > 255 ? 255 : r);
+      pixels[i + 1] = g < 0 ? 0 : (g > 255 ? 255 : g);
+      pixels[i + 2] = b < 0 ? 0 : (b > 255 ? 255 : b);
+    }
+
+    ctx.putImageData(imgDataObj, 0, 0);
+
+    // 4. Sharpen Convolution Filter (Unsharp Mask)
+    if (pSharpen > 0 || isHd) {
+      var sharpAmount = (pSharpen / 100) * 0.9;
+      var sharpened = applyConvolutionSharpen(ctx, w, h, sharpAmount);
+      ctx.putImageData(sharpened, 0, 0);
     }
   }
 
-  // Sharpen convolution filter
-  function applySharpen(imageData, width, height, amount) {
-    var src = imageData.data;
-    var output = new Uint8ClampedArray(src);
-    var weight = amount * 0.8;
-    var kernel = [
-      0, -weight, 0,
-      -weight, 1 + 4 * weight, -weight,
-      0, -weight, 0
-    ];
-    
-    for (var y = 1; y < height - 1; y++) {
-      for (var x = 1; x < width - 1; x++) {
-        for (var c = 0; c < 3; c++) {
-          var sum = 0;
-          var ki = 0;
-          for (var ky = -1; ky <= 1; ky++) {
-            for (var kx = -1; kx <= 1; kx++) {
-              var idx = ((y + ky) * width + (x + kx)) * 4 + c;
-              sum += src[idx] * kernel[ki++];
-            }
+  // Edge-Preserving Denoise (Bilateral / Selective Blur)
+  function applyEdgePreservingDenoise(data, w, h, threshold) {
+    var copy = new Uint8ClampedArray(data);
+    for (var y = 1; y < h - 1; y += 2) { // 2-step sampling for speed
+      for (var x = 1; x < w - 1; x += 2) {
+        var centerIdx = (y * w + x) * 4;
+        var cr = copy[centerIdx];
+        var cg = copy[centerIdx + 1];
+        var cb = copy[centerIdx + 2];
+
+        var sumR = cr, sumG = cg, sumB = cb, count = 1;
+
+        // Check 4 neighbors
+        var neighbors = [-1, 1, -w, w];
+        for (var n = 0; n < neighbors.length; n++) {
+          var nIdx = (y * w + x + neighbors[n]) * 4;
+          var nr = copy[nIdx];
+          var ng = copy[nIdx + 1];
+          var nb = copy[nIdx + 2];
+          var diff = Math.abs(cr - nr) + Math.abs(cg - ng) + Math.abs(cb - nb);
+          if (diff < threshold) {
+            sumR += nr;
+            sumG += ng;
+            sumB += nb;
+            count++;
           }
-          output[(y * width + x) * 4 + c] = Math.max(0, Math.min(255, sum));
+        }
+
+        var avgR = sumR / count;
+        var avgG = sumG / count;
+        var avgB = sumB / count;
+
+        data[centerIdx] = avgR;
+        data[centerIdx + 1] = avgG;
+        data[centerIdx + 2] = avgB;
+      }
+    }
+  }
+
+  // High-precision Sharpen Convolution
+  function applyConvolutionSharpen(ctx, w, h, amount) {
+    var imgData = ctx.getImageData(0, 0, w, h);
+    var src = imgData.data;
+    var out = new Uint8ClampedArray(src);
+    var k = amount * 0.75;
+    // 3x3 Laplacian sharpening kernel
+    // [ 0, -k,  0]
+    // [-k, 1+4k, -k]
+    // [ 0, -k,  0]
+    var centerWeight = 1 + 4 * k;
+
+    for (var y = 1; y < h - 1; y++) {
+      var row = y * w;
+      for (var x = 1; x < w - 1; x++) {
+        var idx = (row + x) * 4;
+        for (var c = 0; c < 3; c++) {
+          var top = ((row - w + x) * 4) + c;
+          var bottom = ((row + w + x) * 4) + c;
+          var left = ((row + x - 1) * 4) + c;
+          var right = ((row + x + 1) * 4) + c;
+
+          var val = (src[idx + c] * centerWeight) - k * (src[top] + src[bottom] + src[left] + src[right]);
+          out[idx + c] = val < 0 ? 0 : (val > 255 ? 255 : val);
         }
       }
     }
-    
-    return new ImageData(output, width, height);
+    return new ImageData(out, w, h);
   }
 
-  // Apply preset
-  function applyPreset(preset) {
-    // Reset to defaults first
-    currentSettings = {
-      preset: preset.name,
-      brightness: 100,
-      contrast: 100,
-      saturation: 100,
-      hue: 0,
-      sepia: 0,
-      grayscale: 0,
-      blur: 0,
-      sharpen: 0,
-      denoise: 0,
-      vibrance: 100,
-      temperature: 0,
-      tint: 0,
-      gamma: 100,
-      exposure: 0,
-      highlights: 0,
-      shadows: 0
-    };
-    
-    // Apply preset filters
-    Object.keys(preset.filters).forEach(function(key) {
-      currentSettings[key] = preset.filters[key];
-    });
-    
-    // Update slider UI
-    renderAdjustSliders();
-    updatePreviews();
+  // Linear Interpolation helper
+  function lerp(a, b, t) {
+    return a + (b - a) * t;
   }
 
-  // Apply enhancement
-  function applyEnhancement(type) {
-    switch(type) {
-      case 'hd':
-        currentSettings.sharpen = Math.min(100, currentSettings.sharpen + 30);
-        currentSettings.contrast = Math.min(150, currentSettings.contrast + 10);
-        currentSettings.saturation = Math.min(150, currentSettings.saturation + 5);
-        break;
-      case 'denoise':
-        currentSettings.blur = Math.min(5, currentSettings.blur + 1);
-        break;
-      case 'sharpen':
-        currentSettings.sharpen = Math.min(100, currentSettings.sharpen + 40);
-        break;
-      case 'hdr':
-        currentSettings.contrast = Math.min(140, currentSettings.contrast + 15);
-        currentSettings.saturation = Math.min(140, currentSettings.saturation + 10);
-        currentSettings.vibrance = Math.min(150, currentSettings.vibrance + 15);
-        break;
-      case 'auto':
-        autoOptimize();
-        break;
-    }
-    renderAdjustSliders();
-    updatePreviews();
-  }
-
-  // Auto optimize using image analysis
-  function autoOptimize() {
+  // Single Image Download (Native Full Resolution)
+  function downloadActiveImage() {
     if (images.length === 0) return;
-    var imgData = images[0];
-    var canvas = document.createElement('canvas');
-    var ctx = canvas.getContext('2d');
-    canvas.width = 100;
-    canvas.height = 100;
-    ctx.drawImage(imgData.img, 0, 0, 100, 100);
-    
-    var data = ctx.getImageData(0, 0, 100, 100).data;
-    var avgR = 0, avgG = 0, avgB = 0, avgBrightness = 0;
-    
-    for (var i = 0; i < data.length; i += 4) {
-      avgR += data[i];
-      avgG += data[i + 1];
-      avgB += data[i + 2];
-      avgBrightness += (data[i] + data[i + 1] + data[i + 2]) / 3;
-    }
-    
-    var pixels = data.length / 4;
-    avgR /= pixels;
-    avgG /= pixels;
-    avgB /= pixels;
-    avgBrightness /= pixels;
-    
-    // Auto adjust brightness
-    if (avgBrightness < 100) {
-      currentSettings.brightness = 110 + (100 - avgBrightness) * 0.2;
-    } else if (avgBrightness > 160) {
-      currentSettings.brightness = 95 - (avgBrightness - 160) * 0.1;
-    } else {
-      currentSettings.brightness = 102;
-    }
-    
-    // Auto contrast
-    currentSettings.contrast = 108;
-    
-    // Auto saturation
-    var saturation = Math.abs(avgR - avgG) + Math.abs(avgG - avgB) + Math.abs(avgB - avgR);
-    if (saturation < 30) {
-      currentSettings.saturation = 115;
-      currentSettings.vibrance = 120;
-    } else {
-      currentSettings.saturation = 105;
-      currentSettings.vibrance = 105;
-    }
-    
-    // Auto temperature
-    if (avgR > avgB + 10) {
-      currentSettings.temperature = -5;
-    } else if (avgB > avgR + 10) {
-      currentSettings.temperature = 5;
-    }
-    
-    // Slight sharpen
-    currentSettings.sharpen = 15;
-    
-    renderAdjustSliders();
+    var cur = images[currentImageIndex];
+    if (!cur) return;
+    executeDownload(cur);
   }
 
-  // Update all previews
-  function updatePreviews() {
-    images.forEach(function(imgData) {
-      imgData.settings = JSON.parse(JSON.stringify(currentSettings));
-      processImage(imgData);
+  // Batch Download All Images
+  function downloadAllImages() {
+    if (images.length === 0) return;
+    showToast('Đang xử lý tải xuống ' + images.length + ' ảnh...');
+    images.forEach(function(imgData, idx) {
+      setTimeout(function() {
+        executeDownload(imgData);
+      }, idx * 300);
     });
   }
 
-  // Select all images
-  function selectAll() {
-    images.forEach(function(img) { selectedImages.add(img.id); });
-    renderImages();
-  }
+  // Execute Download at Full Resolution
+  function executeDownload(imgData) {
+    var fullCanvas = document.createElement('canvas');
+    fullCanvas.width = imgData.width;
+    fullCanvas.height = imgData.height;
+    var ctx = fullCanvas.getContext('2d');
 
-  // Apply current settings to selected
-  function applyToSelected() {
-    if (selectedImages.size === 0) {
-      showToast('Vui lòng chọn ít nhất một ảnh');
-      return;
-    }
-    images.forEach(function(imgData) {
-      if (selectedImages.has(imgData.id)) {
-        imgData.settings = JSON.parse(JSON.stringify(currentSettings));
-        processImage(imgData);
-      }
-    });
-  }
-
-  // Reset all
-  function resetAll() {
-    currentSettings = {
-      preset: null,
-      brightness: 100,
-      contrast: 100,
-      saturation: 100,
-      hue: 0,
-      sepia: 0,
-      grayscale: 0,
-      blur: 0,
-      sharpen: 0,
-      denoise: 0,
-      vibrance: 100,
-      temperature: 0,
-      tint: 0,
-      gamma: 100,
-      exposure: 0,
-      highlights: 0,
-      shadows: 0
-    };
-    renderAdjustSliders();
-    document.querySelectorAll('.preset-card').forEach(function(c, i) {
-      c.classList.toggle('active', i === 0);
-    });
-    updatePreviews();
-  }
-
-  // Remove selected
-  function removeSelected() {
-    if (selectedImages.size === 0) return;
-    images = images.filter(function(img) { return !selectedImages.has(img.id); });
-    selectedImages.clear();
-    if (images.length === 0) {
-      mainContent.style.display = 'none';
-    } else {
-      renderImages();
-    }
-  }
-
-  // Download selected images
-  function downloadSelected() {
-    var toDownload = images.filter(function(img) { return selectedImages.has(img.id); });
-    if (toDownload.length === 0) {
-      showToast('Vui lòng chọn ít nhất một ảnh');
-      return;
-    }
-    toDownload.forEach(function(imgData, index) {
-      setTimeout(function() { downloadImage(imgData); }, index * 200);
-    });
-  }
-
-  // Download all images
-  function downloadAll() {
-    images.forEach(function(imgData, index) {
-      setTimeout(function() { downloadImage(imgData); }, index * 200);
-    });
-  }
-
-  // Download single image at full resolution
-  function downloadImage(imgData) {
-    var canvas = document.createElement('canvas');
-    canvas.width = imgData.width;
-    canvas.height = imgData.height;
-    var ctx = canvas.getContext('2d');
-    
-    var s = imgData.settings;
-    var filters = [];
-    filters.push('brightness(' + s.brightness + '%)');
-    filters.push('contrast(' + s.contrast + '%)');
-    filters.push('saturate(' + s.saturation + '%)');
-    filters.push('hue-rotate(' + s.hue + 'deg)');
-    filters.push('sepia(' + s.sepia + '%)');
-    filters.push('grayscale(' + s.grayscale + '%)');
-    if (s.blur > 0) filters.push('blur(' + s.blur + 'px)');
-    
-    ctx.filter = filters.join(' ');
+    // Draw full resolution image
     ctx.drawImage(imgData.img, 0, 0);
-    ctx.filter = 'none';
-    
-    if (s.temperature !== 0 || s.tint !== 0 || s.vibrance !== 100 || s.gamma !== 100 || s.exposure !== 0 || s.sharpen > 0) {
-      applyPixelAdjustments(ctx, canvas, s);
-    }
-    
+
+    // Apply exact enhancements at full resolution
+    processCanvasPixels(ctx, imgData.width, imgData.height, imgData, enhancementIntensity);
+
+    // Update cloud document state
+    saveImageToCloud(imgData);
+
+    var cleanName = imgData.name.replace(/\.[^/.]+$/, '');
+    var filename = 'enhanced_' + cleanName + '.png';
+
     var link = document.createElement('a');
-    link.download = 'enhanced_' + imgData.name.replace(/\.[^/.]+$/, '') + '.png';
-    link.href = canvas.toDataURL('image/png');
+    link.download = filename;
+    link.href = fullCanvas.toDataURL('image/png', 0.95);
     link.click();
+    showToast('Đã tải: ' + filename);
   }
 
-  // Toast notification
+  // Toast Notification
   function showToast(msg) {
     var toast = document.createElement('div');
     toast.textContent = msg;
-    toast.style.position = 'fixed';
-    toast.style.bottom = '24px';
-    toast.style.right = '24px';
-    toast.style.background = 'var(--accent, #c47046)';
-    toast.style.color = '#202024';
-    toast.style.padding = '12px 20px';
-    toast.style.borderRadius = '10px';
-    toast.style.fontWeight = '600';
-    toast.style.fontSize = '14px';
-    toast.style.boxShadow = '0 8px 24px rgba(0,0,0,0.3)';
-    toast.style.zIndex = '9999';
-    toast.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+    toast.className = 'fixed bottom-5 left-1/2 -translate-x-1/2 bg-[var(--accent)] text-[#1a1a1e] font-semibold text-xs sm:text-sm px-4 py-2.5 rounded-xl shadow-2xl z-50 transition-all duration-300 pointer-events-none text-center max-w-[90vw] truncate';
+    toast.style.boxShadow = '0 10px 25px rgba(0,0,0,0.5)';
     document.body.appendChild(toast);
+
     setTimeout(function() {
       toast.style.opacity = '0';
-      toast.style.transform = 'translateY(10px)';
+      toast.style.transform = 'translate(-50%, 10px)';
       setTimeout(function() { toast.remove(); }, 300);
-    }, 2500);
+    }, 2400);
   }
 
-  // Format file size
-  function formatFileSize(bytes) {
-    var kb = bytes / 1024;
-    if (kb > 1024) return (kb / 1024).toFixed(1) + ' MB';
-    return kb.toFixed(0) + ' KB';
-  }
-
-  // Initialize
+  // Run on start
   init();
 })();
 </script>

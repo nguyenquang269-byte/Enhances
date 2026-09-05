@@ -1,0 +1,51 @@
+{
+  "entities": {
+    "EnhancedImage": {
+      "title": "EnhancedImage",
+      "description": "A record of an enhanced or uploaded image with its settings and thumbnail",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique image identifier"
+        },
+        "name": {
+          "type": "string",
+          "description": "Original file name"
+        },
+        "dataUrl": {
+          "type": "string",
+          "description": "Processed or preview image data URL"
+        },
+        "width": {
+          "type": "number",
+          "description": "Image width in pixels"
+        },
+        "height": {
+          "type": "number",
+          "description": "Image height in pixels"
+        },
+        "fileSize": {
+          "type": "number",
+          "description": "Original file size in bytes"
+        },
+        "mode": {
+          "type": "string",
+          "description": "Enhancement mode applied (auto, hd, denoise, sharpen, hdr, etc.)"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when image was saved"
+        }
+      },
+      "required": ["id", "name", "dataUrl", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/images/{imageId}": {
+      "entity": "EnhancedImage",
+      "description": "Collection of recent enhanced images"
+    }
+  }
+}

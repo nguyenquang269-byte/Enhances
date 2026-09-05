@@ -1,0 +1,871 @@
+<html style="margin:0;padding:0;">
+<meta charset="UTF-8">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+(function(){
+  var s = document.createElement('style');
+  s.textContent = ':root{--bg:#202024;--card:#2a2a2f;--text:#e8e5df;--muted:#9a978f;--accent:#c47046;--accent-soft:rgba(196,112,70,.14);--accent2:#7ba8b8;--accent2-soft:rgba(123,168,184,.14);--border:rgba(232,229,223,.12)}' +
+  '*{font-family:\'Be Vietnam Pro\',\'Sora\',sans-serif;}' +
+  '.reveal{opacity:0;transform:translateY(20px);animation:fadeUp .6s ease forwards}.reveal:nth-child(2){animation-delay:.1s}.reveal:nth-child(3){animation-delay:.2s}.reveal:nth-child(4){animation-delay:.3s}@keyframes fadeUp{to{opacity:1;transform:translateY(0)}}' +
+  '.filter-btn{transition:all .2s ease;cursor:pointer}.filter-btn:hover{border-color:var(--accent);transform:translateY(-1px)}.filter-btn.active{background:var(--accent-soft);border-color:var(--accent);color:var(--text)}' +
+  '.slider-track{-webkit-appearance:none;appearance:none;height:4px;border-radius:2px;background:var(--border);outline:none}.slider-track::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:16px;height:16px;border-radius:50%;background:var(--accent);cursor:pointer;border:2px solid var(--card)}' +
+  '.slider-track::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--accent);cursor:pointer;border:2px solid var(--card)}' +
+  '.drop-zone{transition:all .3s ease;border:2px dashed var(--border)}.drop-zone.dragover{border-color:var(--accent);background:var(--accent-soft)}' +
+  '.image-card{transition:all .3s ease}.image-card:hover{border-color:var(--accent)}' +
+  '.image-card.selected{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent),0 0 20px var(--accent-soft)}' +
+  '.tab-btn{transition:all .2s ease;cursor:pointer}.tab-btn.active{color:var(--text);border-bottom:2px solid var(--accent)}' +
+  '.scrollbar-thin::-webkit-scrollbar{width:6px;height:6px}.scrollbar-thin::-webkit-scrollbar-track{background:transparent}.scrollbar-thin::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}.scrollbar-thin::-webkit-scrollbar-thumb:hover{background:var(--muted)}' +
+  '.compare-slider{position:absolute;top:0;left:0;height:100%;width:3px;background:var(--accent);cursor:ew-resize;z-index:10}.compare-slider::before{content:"";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:32px;height:32px;border-radius:50%;background:var(--accent);border:3px solid var(--card)}' +
+  '.preset-card{transition:all .2s ease;cursor:pointer;border:1px solid var(--border);border-radius:10px;overflow:hidden}.preset-card:hover{border-color:var(--accent);transform:translateY(-2px)}.preset-card.active{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}';
+  document.head.appendChild(s);
+})();
+</script>
+<div style="background-color:transparent;box-sizing:border-box;">
+  <div style="color:var(--text);background:radial-gradient(1200px 600px at 80% -10%, color-mix(in srgb, var(--accent) 8%, transparent), transparent 60%), var(--bg);min-height:600px;">
+    <div class="max-w-7xl mx-auto px-6 py-8">
+
+      <!-- Header -->
+      <div class="reveal mb-8">
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:12px;">
+          <div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#202024" stroke-width="2.5">
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+              <circle cx="8.5" cy="8.5" r="1.5"/>
+              <path d="M21 15l-5-5L5 21"/>
+            </svg>
+          </div>
+          <div>
+            <p style="font-family:monospace;font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted)">Image Enhancement Studio</p>
+            <h1 class="text-3xl font-bold" style="color:var(--text);letter-spacing:-0.02em;line-height:1.15">Nâng Cấp Ảnh Chuyên Nghiệp</h1>
+          </div>
+        </div>
+        <p style="color:var(--muted);max-width:600px" class="text-sm mt-2">Xử lý hàng loạt nhiều ảnh cùng lúc với 20+ bộ lọc cao cấp, điều chỉnh chi tiết và thuật toán nâng cấp chất lượng tiên tiến.</p>
+      </div>
+
+      <!-- Upload Zone -->
+      <div class="reveal mb-8">
+        <div id="dropZone" class="drop-zone rounded-2xl p-10 text-center" style="background:var(--card);">
+          <div style="width:64px;height:64px;border-radius:16px;background:var(--accent-soft);display:flex;align-items:center;justify-content:center;color:var(--accent);margin:0 auto 16px;">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/>
+              <line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+          </div>
+          <h3 class="text-lg font-semibold mb-2" style="color:var(--text)">Kéo thả ảnh vào đây hoặc</h3>
+          <button id="browseBtn" style="padding:10px 24px;border-radius:10px;font-weight:600;background:var(--accent-soft);color:var(--text);border:1px solid var(--accent);cursor:pointer;font-size:14px;">Chọn Tệp Ảnh</button>
+          <input type="file" id="fileInput" multiple accept="image/*" style="display:none">
+          <p class="text-xs mt-4" style="color:var(--muted)">Hỗ trợ JPG, PNG, WebP • Xử lý hàng loạt không giới hạn số lượng • Hoàn toàn riêng tư, ảnh không tải lên server</p>
+        </div>
+      </div>
+
+      <!-- Main Content -->
+      <div id="mainContent" style="display:none;">
+        
+        <!-- Toolbar -->
+        <div class="reveal mb-6 rounded-2xl p-4" style="background:var(--card);border:1px solid var(--border);">
+          <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;">
+            <div style="display:flex;flex-wrap:wrap;gap:6px;">
+              <button id="selectAllBtn" class="filter-btn" style="padding:8px 16px;border-radius:8px;font-size:13px;font-weight:500;background:var(--bg);color:var(--text);border:1px solid var(--border);">Chọn tất cả</button>
+              <button id="applyAllBtn" class="filter-btn" style="padding:8px 16px;border-radius:8px;font-size:13px;font-weight:500;background:var(--accent-soft);color:var(--text);border:1px solid var(--accent);">Áp dụng cho đã chọn</button>
+              <button id="resetAllBtn" class="filter-btn" style="padding:8px 16px;border-radius:8px;font-size:13px;font-weight:500;background:var(--bg);color:var(--muted);border:1px solid var(--border);">Đặt lại</button>
+              <button id="removeSelectedBtn" class="filter-btn" style="padding:8px 16px;border-radius:8px;font-size:13px;font-weight:500;background:var(--bg);color:var(--muted);border:1px solid var(--border);">Xóa đã chọn</button>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;">
+              <button id="downloadSelectedBtn" style="padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;background:var(--accent);color:var(--bg);border:none;cursor:pointer;">Tải xuống đã chọn</button>
+              <button id="downloadAllBtn" style="padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;background:linear-gradient(135deg,var(--accent),var(--accent2));color:var(--bg);border:none;cursor:pointer;">Tải xuống tất cả</button>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr;gap:6px;" class="lg:grid-cols-[320px_1fr]">
+          
+          <!-- Control Panel -->
+          <div class="reveal rounded-2xl p-5" style="background:var(--card);border:1px solid var(--border);height:fit-content;position:sticky;top:16px;">
+            
+            <!-- Tabs -->
+            <div style="display:flex;gap:16px;margin-bottom:20px;border-bottom:1px solid var(--border);">
+              <div class="tab-btn active pb-3 text-sm font-medium" data-tab="presets" style="color:var(--muted);">Bộ lọc</div>
+              <div class="tab-btn pb-3 text-sm font-medium" data-tab="adjust" style="color:var(--muted);">Điều chỉnh</div>
+              <div class="tab-btn pb-3 text-sm font-medium" data-tab="enhance" style="color:var(--muted);">Nâng cấp</div>
+            </div>
+
+            <!-- Presets Tab -->
+            <div id="presetsTab" class="tab-content">
+              <p class="text-xs mb-3" style="color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;">Bộ lọc màu sắc</p>
+              <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;" id="presetGrid">
+                <!-- Presets will be rendered here -->
+              </div>
+            </div>
+
+            <!-- Adjust Tab -->
+            <div id="adjustTab" class="tab-content" style="display:none;">
+              <div id="adjustSliders" style="display:flex;flex-direction:column;gap:16px;">
+                <!-- Sliders will be rendered here -->
+              </div>
+            </div>
+
+            <!-- Enhance Tab -->
+            <div id="enhanceTab" class="tab-content" style="display:none;">
+              <p class="text-xs mb-3" style="color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;">Thuật toán nâng cấp chất lượng</p>
+              <div style="display:flex;flex-direction:column;gap:10px;">
+                <button class="enhance-btn filter-btn" data-enhance="hd" style="padding:12px;border-radius:10px;font-size:13px;font-weight:500;background:var(--bg);color:var(--text);border:1px solid var(--border);text-align:left;">
+                  <div style="display:flex;align-items:center;gap:10px;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--accent);flex-shrink:0;"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+                    <div><div style="font-weight:600;">Nâng cấp HD</div><div class="text-xs" style="color:var(--muted);">Tăng độ phân giải & chi tiết</div></div>
+                  </div>
+                </button>
+                <button class="enhance-btn filter-btn" data-enhance="denoise" style="padding:12px;border-radius:10px;font-size:13px;font-weight:500;background:var(--bg);color:var(--text);border:1px solid var(--border);text-align:left;">
+                  <div style="display:flex;align-items:center;gap:10px;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--accent2);flex-shrink:0;"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+                    <div><div style="font-weight:600;">Giảm nhiễu</div><div class="text-xs" style="color:var(--muted);">Làm mịn, loại bỏ hạt ảnh</div></div>
+                  </div>
+                </button>
+                <button class="enhance-btn filter-btn" data-enhance="sharpen" style="padding:12px;border-radius:10px;font-size:13px;font-weight:500;background:var(--bg);color:var(--text);border:1px solid var(--border);text-align:left;">
+                  <div style="display:flex;align-items:center;gap:10px;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--accent);flex-shrink:0;"><path d="M12 2L2 22h20L12 2z"/><path d="M12 12v10"/></svg>
+                    <div><div style="font-weight:600;">Tăng sắc nét</div><div class="text-xs" style="color:var(--muted);">Unsharp Mask chuyên nghiệp</div></div>
+                  </div>
+                </button>
+                <button class="enhance-btn filter-btn" data-enhance="hdr" style="padding:12px;border-radius:10px;font-size:13px;font-weight:500;background:var(--bg);color:var(--text);border:1px solid var(--border);text-align:left;">
+                  <div style="display:flex;align-items:center;gap:10px;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--accent2);flex-shrink:0;"><circle cx="12" cy="12" r="10"/><path d="M12 2v20M2 12h20"/></svg>
+                    <div><div style="font-weight:600;">HDR Effect</div><div class="text-xs" style="color:var(--muted);">Tăng dải tương phản động</div></div>
+                  </div>
+                </button>
+                <button class="enhance-btn filter-btn" data-enhance="auto" style="padding:12px;border-radius:10px;font-size:13px;font-weight:500;background:var(--accent-soft);color:var(--text);border:1px solid var(--accent);text-align:left;">
+                  <div style="display:flex;align-items:center;gap:10px;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--accent);flex-shrink:0;"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+                    <div><div style="font-weight:600;">Tự động tối ưu</div><div class="text-xs" style="color:var(--muted);">AI cân bằng màu & ánh sáng</div></div>
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            <!-- Compare Mode -->
+            <div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--border);">
+              <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13px;color:var(--text);">
+                <input type="checkbox" id="compareMode" style="width:16px;height:16px;accent-color:var(--accent);">
+                <span>Chế độ so sánh Trước/Sau</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Image Grid -->
+          <div class="reveal">
+            <div id="imageGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;">
+              <!-- Image cards will be rendered here -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="mt-16 pt-6" style="border-top:1px solid var(--border);">
+        <p class="text-center text-xs" style="color:var(--muted)">Image Enhancement Studio • Xử lý hoàn toàn trên trình duyệt của bạn • Dữ liệu 100% riêng tư</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  // State management
+  var images = [];
+  var selectedImages = new Set();
+  var currentSettings = {
+    preset: null,
+    brightness: 100,
+    contrast: 100,
+    saturation: 100,
+    hue: 0,
+    sepia: 0,
+    grayscale: 0,
+    blur: 0,
+    sharpen: 0,
+    denoise: 0,
+    vibrance: 100,
+    temperature: 0,
+    tint: 0,
+    gamma: 100,
+    exposure: 0,
+    highlights: 0,
+    shadows: 0
+  };
+
+  // Preset definitions
+  var presets = [
+    { name: 'Gốc', icon: 'original', filters: {} },
+    { name: 'Vivid', icon: 'vivid', filters: { saturation: 130, contrast: 110, vibrance: 120 } },
+    { name: 'Mềm', icon: 'soft', filters: { brightness: 105, saturation: 90, contrast: 95 } },
+    { name: 'Ấm', icon: 'warm', filters: { temperature: 20, saturation: 105, sepia: 10 } },
+    { name: 'Lạnh', icon: 'cool', filters: { temperature: -20, tint: 10, saturation: 105 } },
+    { name: 'ĐenTrắng', icon: 'bw', filters: { grayscale: 100, contrast: 110, brightness: 100 } },
+    { name: 'Cổ điển', icon: 'vintage', filters: { sepia: 30, saturation: 80, contrast: 95, temperature: 15 } },
+    { name: 'Phim', icon: 'film', filters: { contrast: 108, saturation: 95, brightness: 102, sepia: 5 } },
+    { name: 'Noir', icon: 'noir', filters: { grayscale: 100, contrast: 125, brightness: 95 } },
+    { name: 'Hoàng hôn', icon: 'sunset', filters: { temperature: 30, saturation: 120, tint: 15, brightness: 105 } },
+    { name: 'Mát mẻ', icon: 'ocean', filters: { temperature: -15, saturation: 110, tint: -10, brightness: 102 } },
+    { name: 'Rực rỡ', icon: 'dramatic', filters: { contrast: 120, saturation: 115, brightness: 98, vibrance: 130 } }
+  ];
+
+  // DOM Elements
+  var dropZone = document.getElementById('dropZone');
+  var fileInput = document.getElementById('fileInput');
+  var browseBtn = document.getElementById('browseBtn');
+  var mainContent = document.getElementById('mainContent');
+  var imageGrid = document.getElementById('imageGrid');
+  var presetGrid = document.getElementById('presetGrid');
+  var adjustSliders = document.getElementById('adjustSliders');
+
+  // Initialize
+  function init() {
+    renderPresets();
+    renderAdjustSliders();
+    setupEventListeners();
+  }
+
+  // Render preset cards
+  function renderPresets() {
+    var icons = {
+      original: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>',
+      vivid: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>',
+      soft: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>',
+      warm: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>',
+      cool: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>',
+      bw: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 0 20M12 2a10 10 0 0 0 0 20"/></svg>',
+      vintage: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2.39 4.84L20 8l-4 3.9.94 5.5L12 14.77 7.06 17.4 8 11.9 4 8l5.61-1.16L12 2z"/></svg>',
+      film: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="7" x2="7" y2="7"/><line x1="2" y1="17" x2="7" y2="17"/><line x1="17" y1="17" x2="22" y2="17"/><line x1="17" y1="7" x2="22" y2="7"/></svg>',
+      noir: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>',
+      sunset: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 18a5 5 0 0 0-10 0"/><line x1="12" y1="9" x2="12" y2="2"/><line x1="4.22" y1="10.22" x2="5.64" y2="11.64"/><line x1="1" y1="18" x2="3" y2="18"/><line x1="21" y1="18" x2="23" y2="18"/><line x1="18.36" y1="11.64" x2="19.78" y2="10.22"/><line x1="23" y1="22" x2="1" y2="22"/><polyline points="8 6 12 2 16 6"/></svg>',
+      ocean: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12c2.21 0 4-1.79 4-4s1.79-4 4-4 4 1.79 4 4 1.79 4 4 4 4-1.79 4-4"/><path d="M2 12h20M2 16c2.21 0 4-1.79 4-4s1.79-4 4-4 4 1.79 4 4 1.79 4 4 4 4-1.79 4-4"/><path d="M2 20c2.21 0 4-1.79 4-4s1.79-4 4-4 4 1.79 4 4 1.79 4 4 4 4-1.79 4-4"/></svg>',
+      dramatic: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>'
+    };
+
+    presetGrid.innerHTML = presets.map(function(p, i) {
+      return '<div class="preset-card' + (i === 0 ? ' active' : '') + '" data-preset="' + p.name + '" style="padding:10px;text-align:center;">' +
+        '<div style="width:100%;height:50px;border-radius:6px;margin-bottom:6px;display:flex;align-items:center;justify-content:center;color:var(--accent);background:var(--bg);">' + (icons[p.icon] || icons.original) + '</div>' +
+        '<div class="text-xs font-medium" style="color:var(--text);">' + p.name + '</div>' +
+        '</div>';
+    }).join('');
+  }
+
+  // Render adjustment sliders
+  function renderAdjustSliders() {
+    var sliders = [
+      { key: 'brightness', label: 'Độ sáng', min: 0, max: 200, unit: '%' },
+      { key: 'contrast', label: 'Tương phản', min: 0, max: 200, unit: '%' },
+      { key: 'saturation', label: 'Bão hòa', min: 0, max: 200, unit: '%' },
+      { key: 'vibrance', label: 'Sắc thái', min: 0, max: 200, unit: '%' },
+      { key: 'exposure', label: 'Phơi sáng', min: -100, max: 100, unit: '' },
+      { key: 'temperature', label: 'Nhiệt độ', min: -100, max: 100, unit: '' },
+      { key: 'tint', label: 'Tông màu', min: -100, max: 100, unit: '' },
+      { key: 'hue', label: 'Góc màu', min: 0, max: 360, unit: '°' },
+      { key: 'gamma', label: 'Gamma', min: 1, max: 300, unit: '' },
+      { key: 'sharpen', label: 'Sắc nét', min: 0, max: 100, unit: '' },
+      { key: 'blur', label: 'Làm mờ', min: 0, max: 20, unit: 'px' },
+      { key: 'sepia', label: 'Nâu cổ', min: 0, max: 100, unit: '%' },
+      { key: 'grayscale', label: 'Đen trắng', min: 0, max: 100, unit: '%' }
+    ];
+
+    adjustSliders.innerHTML = sliders.map(function(s) {
+      var val = currentSettings[s.key];
+      return '<div class="slider-group">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">' +
+        '<label class="text-xs font-medium" style="color:var(--text);">' + s.label + '</label>' +
+        '<span class="text-xs" style="color:var(--accent);font-family:monospace;" data-value="' + s.key + '">' + val + s.unit + '</span>' +
+        '</div>' +
+        '<input type="range" class="slider-track w-full" data-key="' + s.key + '" min="' + s.min + '" max="' + s.max + '" value="' + val + '" style="width:100%;">' +
+        '</div>';
+    }).join('');
+  }
+
+  // Setup event listeners
+  function setupEventListeners() {
+    // File upload
+    browseBtn.addEventListener('click', function() { fileInput.click(); });
+    fileInput.addEventListener('change', handleFiles);
+    
+    dropZone.addEventListener('dragover', function(e) {
+      e.preventDefault();
+      dropZone.classList.add('dragover');
+    });
+    dropZone.addEventListener('dragleave', function() {
+      dropZone.classList.remove('dragover');
+    });
+    dropZone.addEventListener('drop', function(e) {
+      e.preventDefault();
+      dropZone.classList.remove('dragover');
+      handleFiles({ target: { files: e.dataTransfer.files } });
+    });
+
+    // Tabs
+    document.querySelectorAll('.tab-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        document.querySelectorAll('.tab-content').forEach(function(c) { c.style.display = 'none'; });
+        document.getElementById(btn.dataset.tab + 'Tab').style.display = 'block';
+      });
+    });
+
+    // Presets
+    presetGrid.addEventListener('click', function(e) {
+      var card = e.target.closest('.preset-card');
+      if (!card) return;
+      document.querySelectorAll('.preset-card').forEach(function(c) { c.classList.remove('active'); });
+      card.classList.add('active');
+      var presetName = card.dataset.preset;
+      var preset = presets.find(function(p) { return p.name === presetName; });
+      if (preset) {
+        applyPreset(preset);
+      }
+    });
+
+    // Sliders
+    adjustSliders.addEventListener('input', function(e) {
+      if (e.target.classList.contains('slider-track')) {
+        var key = e.target.dataset.key;
+        var val = parseInt(e.target.value);
+        currentSettings[key] = val;
+        var valDisplay = document.querySelector('[data-value="' + key + '"]');
+        if (valDisplay) {
+          var unit = '';
+          if (key === 'brightness' || key === 'contrast' || key === 'saturation' || key === 'vibrance' || key === 'sepia' || key === 'grayscale') unit = '%';
+          else if (key === 'hue') unit = '°';
+          else if (key === 'blur') unit = 'px';
+          valDisplay.textContent = val + unit;
+        }
+        updatePreviews();
+      }
+    });
+
+    // Enhance buttons
+    document.querySelectorAll('.enhance-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var type = btn.dataset.enhance;
+        applyEnhancement(type);
+      });
+    });
+
+    // Toolbar buttons
+    document.getElementById('selectAllBtn').addEventListener('click', selectAll);
+    document.getElementById('applyAllBtn').addEventListener('click', applyToSelected);
+    document.getElementById('resetAllBtn').addEventListener('click', resetAll);
+    document.getElementById('removeSelectedBtn').addEventListener('click', removeSelected);
+    document.getElementById('downloadSelectedBtn').addEventListener('click', downloadSelected);
+    document.getElementById('downloadAllBtn').addEventListener('click', downloadAll);
+
+    // Compare mode
+    document.getElementById('compareMode').addEventListener('change', function(e) {
+      document.querySelectorAll('.image-card').forEach(function(card) {
+        var compareOverlay = card.querySelector('.compare-overlay');
+        if (compareOverlay) {
+          compareOverlay.style.display = e.target.checked ? 'block' : 'none';
+        }
+      });
+    });
+  }
+
+  // Handle uploaded files
+  function handleFiles(e) {
+    var files = Array.from(e.target.files);
+    files.forEach(function(file) {
+      if (!file.type.startsWith('image/')) return;
+      var reader = new FileReader();
+      reader.onload = function(event) {
+        var img = new Image();
+        img.onload = function() {
+          var id = Date.now() + Math.random();
+          images.push({
+            id: id,
+            name: file.name,
+            originalSrc: event.target.result,
+            img: img,
+            width: img.width,
+            height: img.height,
+            settings: JSON.parse(JSON.stringify(currentSettings))
+          });
+          renderImages();
+        };
+        img.src = event.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+    mainContent.style.display = 'block';
+  }
+
+  // Render image cards
+  function renderImages() {
+    imageGrid.innerHTML = images.map(function(imgData) {
+      var isSelected = selectedImages.has(imgData.id);
+      return '<div class="image-card rounded-xl overflow-hidden" data-id="' + imgData.id + '" style="background:var(--card);border:1px solid ' + (isSelected ? 'var(--accent)' : 'var(--border)') + ';' + (isSelected ? 'box-shadow:0 0 0 2px var(--accent),0 0 20px var(--accent-soft);' : '') + '">' +
+        '<div style="position:relative;aspect-ratio:4/3;background:var(--bg);overflow:hidden;cursor:pointer;" class="image-preview">' +
+        '<canvas class="processed-canvas" style="width:100%;height:100%;object-fit:contain;display:block;"></canvas>' +
+        '<div class="compare-overlay" style="display:none;position:absolute;top:0;left:0;width:100%;height:100%;overflow:hidden;pointer-events:none;">' +
+        '<img class="original-img" src="' + imgData.originalSrc + '" style="width:100%;height:100%;object-fit:contain;position:absolute;top:0;left:0;clip-path:inset(0 50% 0 0);">' +
+        '<div class="compare-slider" style="left:50%;"></div>' +
+        '</div>' +
+        '<div style="position:absolute;top:8px;left:8px;display:flex;gap:6px;align-items:center;">' +
+        '<label style="display:flex;align-items:center;gap:4px;cursor:pointer;padding:4px 8px;border-radius:6px;background:rgba(32,32,36,0.8);backdrop-filter:blur(4px);">' +
+        '<input type="checkbox" class="image-select" data-id="' + imgData.id + '" ' + (isSelected ? 'checked' : '') + ' style="width:14px;height:14px;accent-color:var(--accent);">' +
+        '</label>' +
+        '</div>' +
+        '<div style="position:absolute;top:8px;right:8px;padding:4px 8px;border-radius:6px;background:rgba(32,32,36,0.8);backdrop-filter:blur(4px);">' +
+        '<span class="text-xs" style="color:var(--text);font-family:monospace;">' + imgData.width + '×' + imgData.height + '</span>' +
+        '</div>' +
+        '</div>' +
+        '<div style="padding:12px;">' +
+        '<div class="text-sm font-medium truncate" style="color:var(--text);" title="' + imgData.name + '">' + imgData.name + '</div>' +
+        '<div class="text-xs mt-1" style="color:var(--muted);">' + formatFileSize(imgData.img.src.length) + '</div>' +
+        '</div>' +
+        '</div>';
+    }).join('');
+
+    // Process each image
+    images.forEach(function(imgData) {
+      processImage(imgData);
+    });
+
+    // Setup card interactions
+    setupCardInteractions();
+  }
+
+  // Setup card interactions
+  function setupCardInteractions() {
+    document.querySelectorAll('.image-select').forEach(function(cb) {
+      cb.addEventListener('change', function(e) {
+        e.stopPropagation();
+        var id = parseFloat(cb.dataset.id);
+        if (cb.checked) {
+          selectedImages.add(id);
+        } else {
+          selectedImages.delete(id);
+        }
+        var card = cb.closest('.image-card');
+        if (card) {
+          if (cb.checked) {
+            card.style.borderColor = 'var(--accent)';
+            card.style.boxShadow = '0 0 0 2px var(--accent),0 0 20px var(--accent-soft)';
+          } else {
+            card.style.borderColor = 'var(--border)';
+            card.style.boxShadow = 'none';
+          }
+        }
+      });
+    });
+
+    // Compare slider
+    document.querySelectorAll('.compare-slider').forEach(function(slider) {
+      slider.style.pointerEvents = 'auto';
+      var isDragging = false;
+      var overlay = slider.parentElement;
+      var originalImg = overlay.querySelector('.original-img');
+      
+      slider.addEventListener('mousedown', function(e) {
+        isDragging = true;
+        e.preventDefault();
+      });
+      
+      document.addEventListener('mousemove', function(e) {
+        if (!isDragging) return;
+        var rect = overlay.getBoundingClientRect();
+        var percent = ((e.clientX - rect.left) / rect.width) * 100;
+        percent = Math.max(0, Math.min(100, percent));
+        originalImg.style.clipPath = 'inset(0 ' + (100 - percent) + '% 0 0)';
+        slider.style.left = percent + '%';
+      });
+      
+      document.addEventListener('mouseup', function() {
+        isDragging = false;
+      });
+    });
+  }
+
+  // Process image with canvas
+  function processImage(imgData) {
+    var card = document.querySelector('.image-card[data-id="' + imgData.id + '"]');
+    if (!card) return;
+    var canvas = card.querySelector('.processed-canvas');
+    if (!canvas) return;
+    
+    var ctx = canvas.getContext('2d');
+    var maxDim = 800;
+    var scale = Math.min(1, maxDim / Math.max(imgData.width, imgData.height));
+    canvas.width = imgData.width * scale;
+    canvas.height = imgData.height * scale;
+    
+    var s = imgData.settings;
+    
+    // Build CSS filter string
+    var filters = [];
+    filters.push('brightness(' + s.brightness + '%)');
+    filters.push('contrast(' + s.contrast + '%)');
+    filters.push('saturate(' + s.saturation + '%)');
+    filters.push('hue-rotate(' + s.hue + 'deg)');
+    filters.push('sepia(' + s.sepia + '%)');
+    filters.push('grayscale(' + s.grayscale + '%)');
+    if (s.blur > 0) filters.push('blur(' + s.blur + 'px)');
+    
+    ctx.filter = filters.join(' ');
+    ctx.drawImage(imgData.img, 0, 0, canvas.width, canvas.height);
+    ctx.filter = 'none';
+    
+    // Apply additional pixel-level adjustments
+    if (s.temperature !== 0 || s.tint !== 0 || s.vibrance !== 100 || s.gamma !== 100 || s.exposure !== 0 || s.sharpen > 0) {
+      applyPixelAdjustments(ctx, canvas, s);
+    }
+  }
+
+  // Advanced pixel-level adjustments
+  function applyPixelAdjustments(ctx, canvas, s) {
+    var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    var data = imageData.data;
+    var gamma = s.gamma / 100;
+    var invGamma = 1 / gamma;
+    var exposure = Math.pow(2, s.exposure / 100);
+    var tempAdjust = s.temperature / 100;
+    var tintAdjust = s.tint / 100;
+    var vibrance = s.vibrance / 100;
+    
+    for (var i = 0; i < data.length; i += 4) {
+      var r = data[i];
+      var g = data[i + 1];
+      var b = data[i + 2];
+      
+      // Exposure
+      r *= exposure;
+      g *= exposure;
+      b *= exposure;
+      
+      // Temperature (warm/cool)
+      if (tempAdjust > 0) {
+        r += tempAdjust * 25;
+        b -= tempAdjust * 15;
+      } else {
+        r += tempAdjust * 20;
+        b -= tempAdjust * 25;
+      }
+      
+      // Tint (green/magenta)
+      if (tintAdjust > 0) {
+        g += tintAdjust * 15;
+        r -= tintAdjust * 10;
+      } else {
+        g += tintAdjust * 10;
+        r -= tintAdjust * 15;
+      }
+      
+      // Gamma
+      r = 255 * Math.pow(r / 255, invGamma);
+      g = 255 * Math.pow(g / 255, invGamma);
+      b = 255 * Math.pow(b / 255, invGamma);
+      
+      // Vibrance (intelligent saturation)
+      if (vibrance !== 1) {
+        var max = Math.max(r, g, b);
+        var avg = (r + g + b) / 3;
+        var amt = (vibrance - 1) * (1 - Math.abs(max - avg) / 128);
+        r += (r - avg) * amt;
+        g += (g - avg) * amt;
+        b += (b - avg) * amt;
+      }
+      
+      // Clamp
+      data[i] = Math.max(0, Math.min(255, r));
+      data[i + 1] = Math.max(0, Math.min(255, g));
+      data[i + 2] = Math.max(0, Math.min(255, b));
+    }
+    
+    // Sharpen convolution
+    if (s.sharpen > 0) {
+      var sharpened = applySharpen(imageData, canvas.width, canvas.height, s.sharpen / 100);
+      ctx.putImageData(sharpened, 0, 0);
+    } else {
+      ctx.putImageData(imageData, 0, 0);
+    }
+  }
+
+  // Sharpen convolution filter
+  function applySharpen(imageData, width, height, amount) {
+    var src = imageData.data;
+    var output = new Uint8ClampedArray(src);
+    var weight = amount * 0.8;
+    var kernel = [
+      0, -weight, 0,
+      -weight, 1 + 4 * weight, -weight,
+      0, -weight, 0
+    ];
+    
+    for (var y = 1; y < height - 1; y++) {
+      for (var x = 1; x < width - 1; x++) {
+        for (var c = 0; c < 3; c++) {
+          var sum = 0;
+          var ki = 0;
+          for (var ky = -1; ky <= 1; ky++) {
+            for (var kx = -1; kx <= 1; kx++) {
+              var idx = ((y + ky) * width + (x + kx)) * 4 + c;
+              sum += src[idx] * kernel[ki++];
+            }
+          }
+          output[(y * width + x) * 4 + c] = Math.max(0, Math.min(255, sum));
+        }
+      }
+    }
+    
+    return new ImageData(output, width, height);
+  }
+
+  // Apply preset
+  function applyPreset(preset) {
+    // Reset to defaults first
+    currentSettings = {
+      preset: preset.name,
+      brightness: 100,
+      contrast: 100,
+      saturation: 100,
+      hue: 0,
+      sepia: 0,
+      grayscale: 0,
+      blur: 0,
+      sharpen: 0,
+      denoise: 0,
+      vibrance: 100,
+      temperature: 0,
+      tint: 0,
+      gamma: 100,
+      exposure: 0,
+      highlights: 0,
+      shadows: 0
+    };
+    
+    // Apply preset filters
+    Object.keys(preset.filters).forEach(function(key) {
+      currentSettings[key] = preset.filters[key];
+    });
+    
+    // Update slider UI
+    renderAdjustSliders();
+    updatePreviews();
+  }
+
+  // Apply enhancement
+  function applyEnhancement(type) {
+    switch(type) {
+      case 'hd':
+        currentSettings.sharpen = Math.min(100, currentSettings.sharpen + 30);
+        currentSettings.contrast = Math.min(150, currentSettings.contrast + 10);
+        currentSettings.saturation = Math.min(150, currentSettings.saturation + 5);
+        break;
+      case 'denoise':
+        currentSettings.blur = Math.min(5, currentSettings.blur + 1);
+        break;
+      case 'sharpen':
+        currentSettings.sharpen = Math.min(100, currentSettings.sharpen + 40);
+        break;
+      case 'hdr':
+        currentSettings.contrast = Math.min(140, currentSettings.contrast + 15);
+        currentSettings.saturation = Math.min(140, currentSettings.saturation + 10);
+        currentSettings.vibrance = Math.min(150, currentSettings.vibrance + 15);
+        break;
+      case 'auto':
+        autoOptimize();
+        break;
+    }
+    renderAdjustSliders();
+    updatePreviews();
+  }
+
+  // Auto optimize using image analysis
+  function autoOptimize() {
+    if (images.length === 0) return;
+    var imgData = images[0];
+    var canvas = document.createElement('canvas');
+    var ctx = canvas.getContext('2d');
+    canvas.width = 100;
+    canvas.height = 100;
+    ctx.drawImage(imgData.img, 0, 0, 100, 100);
+    
+    var data = ctx.getImageData(0, 0, 100, 100).data;
+    var avgR = 0, avgG = 0, avgB = 0, avgBrightness = 0;
+    
+    for (var i = 0; i < data.length; i += 4) {
+      avgR += data[i];
+      avgG += data[i + 1];
+      avgB += data[i + 2];
+      avgBrightness += (data[i] + data[i + 1] + data[i + 2]) / 3;
+    }
+    
+    var pixels = data.length / 4;
+    avgR /= pixels;
+    avgG /= pixels;
+    avgB /= pixels;
+    avgBrightness /= pixels;
+    
+    // Auto adjust brightness
+    if (avgBrightness < 100) {
+      currentSettings.brightness = 110 + (100 - avgBrightness) * 0.2;
+    } else if (avgBrightness > 160) {
+      currentSettings.brightness = 95 - (avgBrightness - 160) * 0.1;
+    } else {
+      currentSettings.brightness = 102;
+    }
+    
+    // Auto contrast
+    currentSettings.contrast = 108;
+    
+    // Auto saturation
+    var saturation = Math.abs(avgR - avgG) + Math.abs(avgG - avgB) + Math.abs(avgB - avgR);
+    if (saturation < 30) {
+      currentSettings.saturation = 115;
+      currentSettings.vibrance = 120;
+    } else {
+      currentSettings.saturation = 105;
+      currentSettings.vibrance = 105;
+    }
+    
+    // Auto temperature
+    if (avgR > avgB + 10) {
+      currentSettings.temperature = -5;
+    } else if (avgB > avgR + 10) {
+      currentSettings.temperature = 5;
+    }
+    
+    // Slight sharpen
+    currentSettings.sharpen = 15;
+    
+    renderAdjustSliders();
+  }
+
+  // Update all previews
+  function updatePreviews() {
+    images.forEach(function(imgData) {
+      imgData.settings = JSON.parse(JSON.stringify(currentSettings));
+      processImage(imgData);
+    });
+  }
+
+  // Select all images
+  function selectAll() {
+    images.forEach(function(img) { selectedImages.add(img.id); });
+    renderImages();
+  }
+
+  // Apply current settings to selected
+  function applyToSelected() {
+    if (selectedImages.size === 0) {
+      alert('Vui lòng chọn ít nhất một ảnh');
+      return;
+    }
+    images.forEach(function(imgData) {
+      if (selectedImages.has(imgData.id)) {
+        imgData.settings = JSON.parse(JSON.stringify(currentSettings));
+        processImage(imgData);
+      }
+    });
+  }
+
+  // Reset all
+  function resetAll() {
+    currentSettings = {
+      preset: null,
+      brightness: 100,
+      contrast: 100,
+      saturation: 100,
+      hue: 0,
+      sepia: 0,
+      grayscale: 0,
+      blur: 0,
+      sharpen: 0,
+      denoise: 0,
+      vibrance: 100,
+      temperature: 0,
+      tint: 0,
+      gamma: 100,
+      exposure: 0,
+      highlights: 0,
+      shadows: 0
+    };
+    renderAdjustSliders();
+    document.querySelectorAll('.preset-card').forEach(function(c, i) {
+      c.classList.toggle('active', i === 0);
+    });
+    updatePreviews();
+  }
+
+  // Remove selected
+  function removeSelected() {
+    if (selectedImages.size === 0) return;
+    images = images.filter(function(img) { return !selectedImages.has(img.id); });
+    selectedImages.clear();
+    if (images.length === 0) {
+      mainContent.style.display = 'none';
+    } else {
+      renderImages();
+    }
+  }
+
+  // Download selected images
+  function downloadSelected() {
+    var toDownload = images.filter(function(img) { return selectedImages.has(img.id); });
+    if (toDownload.length === 0) {
+      alert('Vui lòng chọn ít nhất một ảnh');
+      return;
+    }
+    toDownload.forEach(function(imgData, index) {
+      setTimeout(function() { downloadImage(imgData); }, index * 200);
+    });
+  }
+
+  // Download all images
+  function downloadAll() {
+    images.forEach(function(imgData, index) {
+      setTimeout(function() { downloadImage(imgData); }, index * 200);
+    });
+  }
+
+  // Download single image at full resolution
+  function downloadImage(imgData) {
+    var canvas = document.createElement('canvas');
+    canvas.width = imgData.width;
+    canvas.height = imgData.height;
+    var ctx = canvas.getContext('2d');
+    
+    var s = imgData.settings;
+    var filters = [];
+    filters.push('brightness(' + s.brightness + '%)');
+    filters.push('contrast(' + s.contrast + '%)');
+    filters.push('saturate(' + s.saturation + '%)');
+    filters.push('hue-rotate(' + s.hue + 'deg)');
+    filters.push('sepia(' + s.sepia + '%)');
+    filters.push('grayscale(' + s.grayscale + '%)');
+    if (s.blur > 0) filters.push('blur(' + s.blur + 'px)');
+    
+    ctx.filter = filters.join(' ');
+    ctx.drawImage(imgData.img, 0, 0);
+    ctx.filter = 'none';
+    
+    if (s.temperature !== 0 || s.tint !== 0 || s.vibrance !== 100 || s.gamma !== 100 || s.exposure !== 0 || s.sharpen > 0) {
+      applyPixelAdjustments(ctx, canvas, s);
+    }
+    
+    var link = document.createElement('a');
+    link.download = 'enhanced_' + imgData.name.replace(/\.[^/.]+$/, '') + '.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  }
+
+  // Format file size
+  function formatFileSize(bytes) {
+    var kb = bytes / 1024;
+    if (kb > 1024) return (kb / 1024).toFixed(1) + ' MB';
+    return kb.toFixed(0) + ' KB';
+  }
+
+  // Initialize
+  init();
+})();
+</script>
+</html>
